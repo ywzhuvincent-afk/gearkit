@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GearKit · Outdoor Gear, Simplified</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--green:#1D9E75;--green-light:#E1F5EE;--green-mid:#9FE1CB;--green-dark:#0F6E56;--green-deep:#085041;--blue:#185FA5;--blue-light:#E6F1FB;--purple:#534AB7;--purple-light:#EEEDFE;--amber:#BA7517;--amber-light:#FAEEDA;--red:#C0392B;--red-light:#FDECEA;--gray-bg:#F7F6F2;--gray-border:#E0DDD5;--gray-text:#6B6A65;--text:#1A1A18;--shadow:0 2px 16px rgba(0,0,0,0.07);--radius:14px;--radius-sm:8px}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--gray-bg);color:var(--text);min-height:100vh;line-height:1.6;font-family:'Inter',sans-serif}
+html[lang="zh"] body{font-family:'Noto Sans SC','Inter',sans-serif}
+html[dir="rtl"] body{font-family:'Noto Sans Arabic','Inter',sans-serif}
+
+/* NAV */
+nav{background:#fff;border-bottom:1px solid var(--gray-border);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:200}
+.logo{font-family:'DM Serif Display',serif;font-size:22px;color:var(--green-dark);letter-spacing:-0.5px}
+.logo span{color:var(--green)}
+.lang-picker{position:relative}
+.lang-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;border:1.5px solid var(--gray-border);border-radius:20px;background:#fff;font-size:13px;cursor:pointer;color:var(--text);font-family:inherit;transition:border-color .15s}
+.lang-btn:hover{border-color:var(--green)}
+.lang-dropdown{display:none;position:absolute;top:calc(100% + 8px);right:0;background:#fff;border:1.5px solid var(--gray-border);border-radius:var(--radius-sm);box-shadow:var(--shadow);min-width:160px;z-index:300;overflow:hidden}
+html[dir="rtl"] .lang-dropdown{right:auto;left:0}
+.lang-dropdown.open{display:block}
+.lang-option{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;font-size:14px;transition:background .12s}
+.lang-option:hover{background:var(--gray-bg)}
+.lang-option.active{color:var(--green);font-weight:600}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,var(--green-deep) 0%,var(--green-dark) 55%,var(--green) 100%);color:#fff;text-align:center;padding:3rem 2rem 2.5rem;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-80px;right:-80px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,0.04)}
+.hero h1{font-size:34px;font-weight:700;letter-spacing:-1px;margin-bottom:10px}
+.hero p{font-size:16px;opacity:.82;max-width:480px;margin:0 auto 1.8rem;line-height:1.7}
+.hero-pills{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.pill{background:rgba(255,255,255,0.13);border:1px solid rgba(255,255,255,0.22);color:#fff;font-size:13px;padding:5px 14px;border-radius:20px}
+
+/* MAIN */
+.main{max-width:820px;margin:0 auto;padding:2.5rem 1.5rem 4rem}
+
+/* PROGRESS */
+.progress-bar{display:flex;align-items:center;margin-bottom:2.5rem}
+.prog-step{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;position:relative}
+.prog-step::after{content:'';position:absolute;top:16px;left:50%;width:100%;height:2px;background:var(--gray-border);z-index:0}
+.prog-step:last-child::after{display:none}
+.prog-dot{width:32px;height:32px;border-radius:50%;background:#fff;border:2px solid var(--gray-border);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--gray-text);position:relative;z-index:1;transition:all .25s}
+.prog-dot.done{background:var(--green);border-color:var(--green);color:#fff}
+.prog-dot.active{background:#fff;border-color:var(--green);color:var(--green);box-shadow:0 0 0 4px var(--green-light)}
+.prog-label{font-size:11px;color:var(--gray-text);white-space:nowrap;text-align:center}
+.prog-label.active{color:var(--green);font-weight:600}
+
+/* PANELS */
+.step-panel{display:none}
+.step-panel.active{display:block;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.section-title{font-size:22px;font-weight:700;margin-bottom:6px}
+.section-sub{font-size:14px;color:var(--gray-text);margin-bottom:1.8rem}
+.group-label{font-size:12px;font-weight:700;color:var(--gray-text);letter-spacing:.06em;text-transform:uppercase;margin-bottom:10px}
+
+/* ACTIVITY GRID */
+.activity-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:2rem}
+.act-card{background:#fff;border:1.5px solid var(--gray-border);border-radius:var(--radius);padding:1rem;text-align:center;cursor:pointer;transition:all .18s;box-shadow:var(--shadow);overflow:hidden}
+.act-card:hover{border-color:var(--green);transform:translateY(-2px);box-shadow:0 6px 24px rgba(29,158,117,.13)}
+.act-card.selected{border-color:var(--green);background:var(--green-light);box-shadow:0 0 0 3px rgba(29,158,117,.15)}
+.act-img{width:100%;height:90px;object-fit:cover;border-radius:8px;margin-bottom:8px;background:var(--gray-bg)}
+.act-img-placeholder{width:100%;height:90px;border-radius:8px;margin-bottom:8px;display:flex;align-items:center;justify-content:center;font-size:40px;background:linear-gradient(135deg,var(--green-light),var(--green-mid))}
+.act-name{font-size:14px;font-weight:600}
+.act-name-zh{font-size:11px;color:var(--gray-text);margin-top:2px}
+.act-badge{font-size:10px;background:var(--green-light);color:var(--green-dark);padding:2px 8px;border-radius:10px;margin-top:5px;display:inline-block;font-weight:500}
+
+/* TIER / GROUP CARDS */
+.tier-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:1.5rem}
+.group-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:1.5rem}
+.tier-card{background:#fff;border:1.5px solid var(--gray-border);border-radius:var(--radius);padding:1.2rem;cursor:pointer;transition:all .18s;box-shadow:var(--shadow);position:relative}
+.tier-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.1)}
+.tier-card.selected{border-width:2px}
+.t-basic.selected{border-color:#888780;background:#F7F6F2}
+.t-mid.selected{border-color:var(--blue);background:var(--blue-light)}
+.t-premium.selected{border-color:var(--purple);background:var(--purple-light)}
+.t-group.selected{border-color:var(--amber);background:var(--amber-light)}
+.tier-badge{font-size:10px;font-weight:600;padding:3px 10px;border-radius:20px;display:inline-block;margin-bottom:8px}
+.t-basic .tier-badge{background:#F1EFE8;color:#5F5E5A}
+.t-mid .tier-badge{background:var(--blue-light);color:var(--blue)}
+.t-premium .tier-badge{background:var(--purple-light);color:var(--purple)}
+.t-group .tier-badge{background:var(--amber-light);color:var(--amber)}
+.tier-name{font-size:15px;font-weight:700;margin-bottom:4px}
+.tier-desc{font-size:12px;color:var(--gray-text);line-height:1.6;margin-bottom:10px}
+.tier-price{font-size:20px;font-weight:700}
+.tier-price small{font-size:12px;font-weight:400;color:var(--gray-text)}
+.popular-tag{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:var(--blue);color:#fff;font-size:10px;font-weight:600;padding:3px 12px;border-radius:20px;white-space:nowrap}
+
+/* GROUP SIZE ROW */
+.group-size-row{display:none;align-items:center;gap:14px;background:#fff;border:1.5px solid var(--amber);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:1.5rem;flex-wrap:wrap}
+.group-size-row.visible{display:flex}
+.group-size-label{font-size:13px;font-weight:600;color:var(--amber)}
+.group-counter{display:flex;align-items:center}
+.cnt-btn{width:32px;height:32px;border:1.5px solid var(--gray-border);background:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:700}
+.cnt-btn:first-child{border-radius:var(--radius-sm) 0 0 var(--radius-sm)}
+.cnt-btn:last-child{border-radius:0 var(--radius-sm) var(--radius-sm) 0}
+.cnt-btn:hover{background:var(--gray-bg)}
+.cnt-val{width:40px;text-align:center;border-top:1.5px solid var(--gray-border);border-bottom:1.5px solid var(--gray-border);height:32px;line-height:32px;font-size:15px;font-weight:700;background:#fff}
+.gtype-btns{display:flex;gap:8px;flex-wrap:wrap}
+.gtype-btn{padding:5px 12px;border:1.5px solid var(--gray-border);border-radius:20px;font-size:12px;cursor:pointer;background:#fff;font-family:inherit;transition:all .12s}
+.gtype-btn.active{border-color:var(--amber);background:var(--amber-light);color:var(--amber);font-weight:600}
+
+/* PROFILE FORM */
+.profile-card{background:#fff;border-radius:var(--radius);border:1.5px solid var(--gray-border);padding:1.4rem;margin-bottom:2rem;box-shadow:var(--shadow)}
+.profile-title{font-size:14px;font-weight:600;margin-bottom:1rem}
+.form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.form-sec{font-size:11px;font-weight:700;color:var(--gray-text);letter-spacing:.06em;text-transform:uppercase;padding:12px 0 6px;grid-column:1/-1;border-top:1px solid var(--gray-bg);margin-top:4px}
+.form-sec:first-child{border-top:none;padding-top:0;margin-top:0}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group label{font-size:12px;color:var(--gray-text);font-weight:500}
+.form-group input,.form-group select{padding:10px 12px;border:1.5px solid var(--gray-border);border-radius:var(--radius-sm);font-size:14px;font-family:inherit;color:var(--text);background:var(--gray-bg);outline:none;transition:border-color .15s}
+.form-group input:focus,.form-group select:focus{border-color:var(--green);background:#fff}
+.span2{grid-column:span 2}
+.climate-hint{font-size:12px;color:var(--green-dark);background:var(--green-light);border:1px solid var(--green-mid);border-radius:var(--radius-sm);padding:10px 14px;display:none;grid-column:1/-1;line-height:1.6}
+.climate-hint.show{display:block}
+
+/* SCHOOL BADGE */
+.school-badge{display:inline-flex;align-items:center;gap:6px;background:#fff3e0;border:1px solid #ffb74d;border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:#e65100;margin-bottom:12px}
+
+/* GEAR LIST */
+.gear-cat-header{font-size:11px;font-weight:700;color:var(--gray-text);letter-spacing:.08em;text-transform:uppercase;padding:10px 0 6px;border-bottom:1.5px solid var(--gray-border);margin-bottom:8px}
+.gear-item{display:flex;align-items:center;gap:12px;padding:10px 12px;background:#fff;border:1.5px solid var(--gray-border);border-radius:var(--radius-sm);margin-bottom:8px;cursor:pointer;transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.gear-item:hover{border-color:var(--green-mid)}
+.gear-item.checked{border-color:var(--green);background:var(--green-light)}
+.gear-thumb{width:48px;height:48px;border-radius:6px;object-fit:cover;flex-shrink:0;background:var(--gray-bg)}
+.gear-thumb-ph{width:48px;height:48px;border-radius:6px;flex-shrink:0;background:linear-gradient(135deg,var(--gray-bg),var(--gray-border));display:flex;align-items:center;justify-content:center;font-size:22px}
+.gear-check{width:20px;height:20px;border-radius:6px;border:2px solid var(--gray-border);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:transparent;transition:all .15s}
+.gear-item.checked .gear-check{background:var(--green);border-color:var(--green);color:#fff}
+.gear-info{flex:1;min-width:0}
+.gear-name{font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.gear-name-zh{font-size:11px;color:var(--gray-text);margin-top:1px}
+.gear-brand{font-size:11px;color:var(--gray-text);margin-top:2px}
+.rec-tag{font-size:10px;background:var(--green-light);color:var(--green-dark);padding:2px 7px;border-radius:10px;font-weight:600;flex-shrink:0}
+.cold-tag{font-size:10px;background:var(--blue-light);color:var(--blue);padding:2px 7px;border-radius:10px;font-weight:600;flex-shrink:0}
+.school-tag{font-size:10px;background:#fff3e0;color:#e65100;padding:2px 7px;border-radius:10px;font-weight:600;flex-shrink:0}
+.gear-price{font-size:14px;font-weight:700;white-space:nowrap;text-align:right}
+.gear-price-budget{font-size:10px;color:var(--green-dark);margin-top:2px;white-space:nowrap}
+
+/* EXTRA ITEMS BUTTON */
+.extra-items-btn{display:flex;align-items:center;gap:10px;padding:14px 16px;background:#fff;border:1.5px dashed var(--purple);border-radius:var(--radius-sm);margin-top:10px;cursor:pointer;transition:all .15s;color:var(--purple);font-size:14px;font-weight:600;font-family:inherit;width:100%}
+.extra-items-btn:hover{background:var(--purple-light);border-style:solid}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:500;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:var(--radius);max-width:680px;width:100%;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.modal-header{padding:1.2rem 1.4rem;border-bottom:1px solid var(--gray-border);display:flex;justify-content:space-between;align-items:center}
+.modal-header h3{font-size:16px;font-weight:700}
+.modal-close{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--gray-border);background:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit}
+.modal-close:hover{background:var(--gray-bg)}
+.modal-body{padding:1.2rem 1.4rem;overflow-y:auto;flex:1}
+.modal-note{font-size:13px;color:var(--gray-text);background:var(--gray-bg);border-radius:var(--radius-sm);padding:10px 14px;margin-bottom:1rem;line-height:1.6}
+.extra-gear-item{display:flex;align-items:center;gap:12px;padding:10px 12px;background:#fff;border:1.5px solid var(--gray-border);border-radius:var(--radius-sm);margin-bottom:8px;cursor:pointer;transition:all .15s}
+.extra-gear-item:hover{border-color:var(--purple)}
+.extra-gear-item.checked{border-color:var(--purple);background:var(--purple-light)}
+.extra-gear-item .gear-check{border-color:var(--gray-border)}
+.extra-gear-item.checked .gear-check{background:var(--purple);border-color:var(--purple);color:#fff}
+.extra-link{font-size:11px;color:var(--blue);text-decoration:none;margin-top:2px;display:block}
+.extra-link:hover{text-decoration:underline}
+.modal-footer{padding:1rem 1.4rem;border-top:1px solid var(--gray-border);display:flex;gap:10px}
+.modal-footer .btn-primary{flex:1}
+
+/* SUMMARY */
+.summary-header{background:linear-gradient(135deg,var(--green-dark),var(--green));border-radius:var(--radius);padding:1.6rem;color:#fff;margin-bottom:1.5rem;display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.summary-header h2{font-size:17px;font-weight:700}
+.summary-header p{font-size:12px;opacity:.8;margin-top:4px}
+.summary-total{font-size:32px;font-weight:700;white-space:nowrap}
+.summary-table{background:#fff;border-radius:var(--radius);border:1.5px solid var(--gray-border);overflow:hidden;margin-bottom:1.5rem;box-shadow:var(--shadow)}
+.summary-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--gray-bg);font-size:13px}
+.summary-row:last-child{border-bottom:none}
+.s-name{font-weight:500}
+.s-brand{font-size:11px;color:var(--gray-text)}
+
+/* PLATFORMS */
+.platform-section{margin-bottom:2rem}
+.platform-tier{margin-bottom:1rem}
+.platform-tier-label{font-size:11px;font-weight:700;color:var(--gray-text);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
+.platform-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.platform-card{background:#fff;border:1.5px solid var(--gray-border);border-radius:var(--radius-sm);padding:12px;text-align:center;cursor:pointer;transition:all .15s;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.platform-card:hover{border-color:var(--green);transform:translateY(-2px)}
+.platform-card.budget{border-color:#ffd54f;background:#fffde7}
+.platform-card.budget:hover{border-color:var(--amber)}
+.p-icon{font-size:20px;margin-bottom:5px}
+.p-name{font-size:13px;font-weight:600}
+.p-tag{font-size:11px;color:var(--gray-text);margin-top:1px}
+.budget-badge{font-size:9px;background:#ffd54f;color:#5D4037;padding:2px 7px;border-radius:10px;font-weight:600;margin-top:3px;display:inline-block}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:var(--radius-sm);font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .18s;border:none}
+.btn-primary{background:var(--green);color:#fff;width:100%;font-size:15px;padding:14px;box-shadow:0 4px 16px rgba(29,158,117,.3)}
+.btn-primary:hover{background:var(--green-dark)}
+.btn-primary:disabled{opacity:.4;pointer-events:none;box-shadow:none}
+.btn-secondary{background:#fff;color:var(--text);border:1.5px solid var(--gray-border);padding:12px 18px}
+.btn-secondary:hover{background:var(--gray-bg)}
+.btn-row{display:flex;gap:12px}
+.btn-row .btn-primary{flex:1}
+.btn-green-outline{background:var(--green-light);color:var(--green-dark);border:1.5px solid var(--green-mid);width:100%;margin-top:10px;padding:12px;border-radius:var(--radius-sm);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s}
+.btn-green-outline:hover{background:var(--green-mid)}
+.info-bar{background:var(--amber-light);border:1px solid #FAC775;border-radius:var(--radius-sm);padding:11px 14px;font-size:13px;color:var(--amber);margin-bottom:1rem;line-height:1.6}
+footer{text-align:center;padding:2rem;font-size:12px;color:var(--gray-text);border-top:1px solid var(--gray-border);background:#fff}
+html[dir="rtl"] .btn-row{flex-direction:row-reverse}
+html[dir="rtl"] .summary-header{flex-direction:row-reverse}
+@media(max-width:620px){.activity-grid,.tier-grid,.group-grid{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:1fr 1fr}.platform-grid{grid-template-columns:1fr 1fr}.hero h1{font-size:24px}}
+@media print{nav,.hero,.progress-bar,.btn,.btn-row,.btn-green-outline,footer,.extra-items-btn{display:none!important}.step-panel{display:none!important}#step4{display:block!important}body{background:#fff}.main{padding:0}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Gear<span>Kit</span></div>
+  <div class="lang-picker">
+    <button class="lang-btn" onclick="toggleLang()">
+      <span id="flagEl">🇺🇸</span>
+      <span id="lblEl">EN</span>
+      <span style="font-size:10px;opacity:.5">▼</span>
+    </button>
+    <div class="lang-dropdown" id="langDrop">
+      <div class="lang-option active" onclick="setLang('en')">🇺🇸 &nbsp;English</div>
+      <div class="lang-option" onclick="setLang('zh')">🇨🇳 &nbsp;中文</div>
+      <div class="lang-option" onclick="setLang('es')">🇪🇸 &nbsp;Español</div>
+      <div class="lang-option" onclick="setLang('ar')">🇸🇦 &nbsp;العربية</div>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1 data-t="heroTitle">Gear Up Without the Guesswork</h1>
+  <p data-t="heroSub">Pick activity → Choose budget → Select gear → Done.<br>Stop wasting hours across a dozen sites.</p>
+  <div class="hero-pills">
+    <span class="pill" data-t="p1">⏱ Save 3+ hours of research</span>
+    <span class="pill" data-t="p2">🎯 Expert-curated picks</span>
+    <span class="pill" data-t="p3">🛒 One checkout, one delivery</span>
+  </div>
+</div>
+
+<div class="main">
+  <!-- PROGRESS -->
+  <div class="progress-bar">
+    <div class="prog-step"><div class="prog-dot active" id="pd1">1</div><div class="prog-label active" id="pl1" data-t="prg1">Activity</div></div>
+    <div class="prog-step"><div class="prog-dot" id="pd2">2</div><div class="prog-label" id="pl2" data-t="prg2">Plan</div></div>
+    <div class="prog-step"><div class="prog-dot" id="pd3">3</div><div class="prog-label" id="pl3" data-t="prg3">Gear</div></div>
+    <div class="prog-step"><div class="prog-dot" id="pd4">4</div><div class="prog-label" id="pl4" data-t="prg4">Summary</div></div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step-panel active" id="step1">
+    <div class="section-title" data-t="s1t">Choose Your Activity</div>
+    <div class="section-sub" data-t="s1s">Expert-curated gear lists — including school camping programs</div>
+    <div class="activity-grid" id="actGrid"></div>
+    <button class="btn btn-primary" onclick="goStep(2)" id="btn1" disabled data-t="btn1txt">Select an activity to continue →</button>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step-panel" id="step2">
+    <div class="section-title" data-t="s2t">Choose Your Plan</div>
+    <div class="section-sub" data-t="s2s">Pick a budget tier, group type, and trip details</div>
+
+    <div class="group-label" data-t="budgetLbl">Budget Tier</div>
+    <div class="tier-grid">
+      <div class="tier-card t-basic" onclick="pickTier(this,'basic')">
+        <span class="tier-badge" data-t="tb1">Starter</span>
+        <div class="tier-name" data-t="tn1">Essential Kit</div>
+        <div class="tier-desc" data-t="td1">Budget-friendly — borrow, rent, or buy affordable. School camp ready.</div>
+        <div class="tier-price">$80<small data-t="tup"> and up</small></div>
+      </div>
+      <div class="tier-card t-mid" onclick="pickTier(this,'mid')" style="position:relative">
+        <div class="popular-tag" data-t="popTag">👍 Most Popular</div>
+        <span class="tier-badge" data-t="tb2">Mid-Range</span>
+        <div class="tier-name" data-t="tn2">Comfort Kit</div>
+        <div class="tier-desc" data-t="td2">Best value — lightweight, comfortable, built to last</div>
+        <div class="tier-price">$400<small data-t="tup2"> and up</small></div>
+      </div>
+      <div class="tier-card t-premium" onclick="pickTier(this,'premium')">
+        <span class="tier-badge" data-t="tb3">Premium</span>
+        <div class="tier-name" data-t="tn3">Pro Kit</div>
+        <div class="tier-desc" data-t="td3">Top-tier materials for serious adventurers</div>
+        <div class="tier-price">$1,200<small data-t="tup3"> and up</small></div>
+      </div>
+    </div>
+
+    <div class="group-label" data-t="groupLbl">Group Size &amp; Type</div>
+    <div class="group-grid">
+      <div class="tier-card t-group" onclick="pickGroup(this,'solo')">
+        <span class="tier-badge" data-t="gb1">Solo</span>
+        <div class="tier-name" data-t="gn1">Just Me</div>
+        <div class="tier-desc" data-t="gd1">Individual list tailored to one person</div>
+      </div>
+      <div class="tier-card t-group" onclick="pickGroup(this,'family')">
+        <span class="tier-badge" data-t="gb2">Family</span>
+        <div class="tier-name" data-t="gn2">Family Trip</div>
+        <div class="tier-desc" data-t="gd2">Parents + kids — includes child-specific and shared gear</div>
+      </div>
+      <div class="tier-card t-group" onclick="pickGroup(this,'group')">
+        <span class="tier-badge" data-t="gb3">Group</span>
+        <div class="tier-name" data-t="gn3">Group / Team</div>
+        <div class="tier-desc" data-t="gd3">Friends, club, or school class — shared gear split across group</div>
+      </div>
+    </div>
+
+    <div class="group-size-row" id="grpRow">
+      <span class="group-size-label" data-t="grpSzLbl">People:</span>
+      <div class="group-counter">
+        <button class="cnt-btn" onclick="chgCnt(-1)">−</button>
+        <div class="cnt-val" id="grpCnt">3</div>
+        <button class="cnt-btn" onclick="chgCnt(1)">+</button>
+      </div>
+      <div class="gtype-btns">
+        <button class="gtype-btn active" onclick="pickGType(this,'mixed')" data-t="gt1">Mixed Ages</button>
+        <button class="gtype-btn" onclick="pickGType(this,'adults')" data-t="gt2">Adults Only</button>
+        <button class="gtype-btn" onclick="pickGType(this,'kids')" data-t="gt3">Kids + Adults</button>
+      </div>
+    </div>
+
+    <div class="profile-card">
+      <div class="profile-title" data-t="profTitle">👤 Tell us about the primary user</div>
+      <div class="form-grid">
+        <div class="form-sec" data-t="fsec1">Person</div>
+        <div class="form-group"><label data-t="lAge">Age</label><input type="number" id="age" placeholder="e.g. 13" min="3" max="80" oninput="chk2()"></div>
+        <div class="form-group"><label data-t="lHt">Height (cm)</label><input type="number" id="height" placeholder="e.g. 155" min="80" max="220" oninput="chk2()"></div>
+        <div class="form-group"><label data-t="lWt">Weight (kg)</label><input type="number" id="weight" placeholder="e.g. 50" min="10" max="150" oninput="chk2()"></div>
+
+        <div class="form-sec" data-t="fsec2">Trip Details</div>
+        <div class="form-group"><label data-t="lExp">Experience</label>
+          <select id="exp" onchange="chk2()">
+            <option value="" data-t="ePlc">Select...</option>
+            <option value="first" data-t="eF">First time / School trip</option>
+            <option value="some" data-t="eS">Some experience</option>
+            <option value="expert" data-t="eE">Experienced</option>
+          </select>
+        </div>
+        <div class="form-group"><label data-t="lDays">Trip Length</label>
+          <select id="days" onchange="chk2()">
+            <option value="" data-t="dPlc">Select...</option>
+            <option value="1" data-t="d1">Day trip</option>
+            <option value="2" data-t="d2">2–3 days (overnight)</option>
+            <option value="7" data-t="d7">4–7 days</option>
+            <option value="14" data-t="d14">1 week+</option>
+          </select>
+        </div>
+        <div class="form-group"><label data-t="lMonth">Month of Trip</label>
+          <select id="month" onchange="updHint();chk2()">
+            <option value="">Select...</option>
+            <option value="1">January</option><option value="2">February</option><option value="3">March</option>
+            <option value="4">April</option><option value="5">May</option><option value="6">June</option>
+            <option value="7">July</option><option value="8">August</option><option value="9">September</option>
+            <option value="10">October</option><option value="11">November</option><option value="12">December</option>
+          </select>
+        </div>
+
+        <div class="form-sec" data-t="fsec3">Destination</div>
+        <div class="form-group span2"><label data-t="lDest">City / Park / School Camp Name</label><input type="text" id="dest" placeholder="e.g. Strathcona Park, BC" oninput="updHint();chk2()"></div>
+        <div class="form-group"><label data-t="lClimate">Climate / Terrain</label>
+          <select id="climate" onchange="updHint();chk2()">
+            <option value="">Select...</option>
+            <option value="mountain" data-t="cMtn">Mountain / Alpine</option>
+            <option value="desert" data-t="cDes">Desert / Arid</option>
+            <option value="coastal" data-t="cCst">Coastal / Beach</option>
+            <option value="forest" data-t="cFor">Forest / Temperate</option>
+            <option value="arctic" data-t="cArc">Arctic / Sub-zero</option>
+            <option value="tropical" data-t="cTrp">Tropical / Humid</option>
+          </select>
+        </div>
+        <div class="climate-hint" id="hint"></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-secondary" onclick="goStep(1)">← <span data-t="back">Back</span></button>
+      <button class="btn btn-primary" onclick="goStep(3)" id="btn2" disabled data-t="btn2txt">Next: Select Gear →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step-panel" id="step3">
+    <div class="section-title" data-t="s3t">Select Your Gear</div>
+    <div class="section-sub" id="s3sub">Adjusted for your destination and season</div>
+    <div class="info-bar" data-t="infoBar">✅ Green = must-haves · 🟠 School tag = required by most Canadian/US school programs · Uncheck items you already own.</div>
+    <div id="gearList"></div>
+
+    <!-- EXTRA ITEMS BUTTON -->
+    <button class="extra-items-btn" onclick="openModal()" data-t="extraBtn">
+      <span style="font-size:18px">🔍</span>
+      <div style="text-align:left"><div data-t="extraBtnTitle">Can't find what you need? Browse specialty items</div><div style="font-size:11px;font-weight:400;color:var(--gray-text);margin-top:2px" data-t="extraBtnSub">Niche gear for special activities — most people won't need these</div></div>
+      <span style="margin-left:auto;font-size:16px">→</span>
+    </button>
+
+    <div class="btn-row" style="margin-top:1.5rem">
+      <button class="btn btn-secondary" onclick="goStep(2)">← <span data-t="back">Back</span></button>
+      <button class="btn btn-primary" onclick="goStep(4)" data-t="btn3txt">View My Kit →</button>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step-panel" id="step4">
+    <div class="summary-header">
+      <div><h2 data-t="s4t">🎒 Your Custom Gear Kit</h2><p id="s4desc"></p></div>
+      <div style="text-align:right"><div class="summary-total" id="s4total">$0</div><small style="opacity:.8;font-size:12px" data-t="estLbl">estimated total</small></div>
+    </div>
+    <div class="summary-table" id="s4table"></div>
+
+    <div class="platform-section">
+      <div class="platform-tier">
+        <div class="platform-tier-label" data-t="platPremium">🏆 Premium & Specialty Outdoor</div>
+        <div class="platform-grid">
+          <div class="platform-card"><div class="p-icon">🏕️</div><div class="p-name">REI</div><div class="p-tag" data-t="pt1">US outdoor leader</div></div>
+          <div class="platform-card"><div class="p-icon">⛰️</div><div class="p-name">Backcountry</div><div class="p-tag" data-t="pt2">Expert staff picks</div></div>
+          <div class="platform-card"><div class="p-icon">🇨🇦</div><div class="p-name">MEC</div><div class="p-tag" data-t="pt3">Canada's outdoor co-op</div></div>
+        </div>
+      </div>
+      <div class="platform-tier" style="margin-top:1rem">
+        <div class="platform-tier-label" data-t="platMid">📦 General & Fast Delivery</div>
+        <div class="platform-grid">
+          <div class="platform-card"><div class="p-icon">📦</div><div class="p-name">Amazon</div><div class="p-tag" data-t="pt4">Prime delivery</div></div>
+          <div class="platform-card"><div class="p-icon">🔵</div><div class="p-name">Walmart</div><div class="p-tag" data-t="pt5">In-store pickup</div></div>
+          <div class="platform-card"><div class="p-icon">🎯</div><div class="p-name">Target</div><div class="p-tag" data-t="pt6">Same-day delivery</div></div>
+        </div>
+      </div>
+      <div class="platform-tier" style="margin-top:1rem">
+        <div class="platform-tier-label" data-t="platBudget">💰 Budget-Friendly Options</div>
+        <div class="platform-grid">
+          <div class="platform-card budget"><div class="p-icon">🟠</div><div class="p-name">Temu</div><div class="p-tag" data-t="pt7">Ultra-low prices</div><span class="budget-badge">Save up to 80%</span></div>
+          <div class="platform-card budget"><div class="p-icon">🛍️</div><div class="p-name">Shein</div><div class="p-tag" data-t="pt8">Fashion & apparel</div><span class="budget-badge">Great for clothing</span></div>
+          <div class="platform-card budget"><div class="p-icon">🏪</div><div class="p-name">Dollar Tree / Dollarama</div><div class="p-tag" data-t="pt9">Basic supplies</div><span class="budget-badge">CA $1–4 items</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--amber-light);border:1px solid #FAC775;border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;color:var(--amber);margin-bottom:1.5rem;line-height:1.7" data-t="budgetNote">
+      💡 <strong>Budget tip:</strong> Temu and Shein are great for clothing layers, rain ponchos, gloves, and basic accessories. For safety-critical gear (helmets, sleeping bags for cold weather, harnesses), we recommend REI, MEC, or Amazon for quality assurance.
+    </div>
+
+    <button class="btn btn-primary" onclick="alert('Coming soon — one-click checkout across all platforms!')" data-t="ckoBtn">🛒 One-Click Checkout (Coming Soon)</button>
+    <button class="btn-green-outline" onclick="window.print()" data-t="printBtn">🖨️ Print / Save as PDF</button>
+    <div style="margin-top:1rem;text-align:center">
+      <button class="btn btn-secondary" onclick="restart()" style="margin:0 auto" data-t="restartBtn">← Start Over</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXTRA ITEMS MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 data-t="modalTitle">🔍 Specialty & Niche Gear</h3>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-note" data-t="modalNote">These items are for specific needs — most campers won't need them. Check what applies to your program or situation. Links open product search pages.</div>
+      <div id="extraList"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal()" data-t="modalCancel">Cancel</button>
+      <button class="btn btn-primary" onclick="addExtraItems()" data-t="modalAdd">Add Selected to Kit →</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div data-t="ft1">GearKit · Outdoor Gear, Simplified · © 2025</div>
+  <div style="margin-top:4px" data-t="ft2">Prices are estimates — final prices vary by retailer · Budget platforms (Temu/Shein) may vary in quality</div>
+</footer>
+
+<script>
+/* ══════════════════════ TRANSLATIONS ══════════════════════ */
+const T={
+en:{heroTitle:"Gear Up Without the Guesswork",heroSub:"Pick activity → Choose budget → Select gear → Done.<br>Stop wasting hours across a dozen sites.",p1:"⏱ Save 3+ hours",p2:"🎯 Expert-curated",p3:"🛒 One checkout",prg1:"Activity",prg2:"Plan",prg3:"Gear",prg4:"Summary",s1t:"Choose Your Activity",s1s:"Expert-curated gear lists — including school camping programs",btn1txt:"Select an activity →",aCamping:"Camping",aHiking:"Hiking",aSkiing:"Skiing",aCycling:"Cycling",aKayak:"Kayaking",aClimb:"Climbing",aSurf:"Surfing",aRun:"Trail Running",aFish:"Fishing",aSchool:"School Camp",aPop:"Most Popular",s2t:"Choose Your Plan",s2s:"Pick a budget tier, group type, and trip details",budgetLbl:"Budget Tier",tb1:"Starter",tn1:"Essential Kit",td1:"Budget-friendly — borrow, rent, or buy affordable. School camp ready.",tup:" and up",tup2:" and up",tup3:" and up",popTag:"👍 Most Popular",tb2:"Mid-Range",tn2:"Comfort Kit",td2:"Best value — lightweight, comfortable, built to last",tb3:"Premium",tn3:"Pro Kit",td3:"Top-tier materials for serious adventurers",groupLbl:"Group Size & Type",gb1:"Solo",gn1:"Just Me",gd1:"Individual list tailored to one person",gb2:"Family",gn2:"Family Trip",gd2:"Parents + kids — includes child-specific and shared gear",gb3:"Group",gn3:"Group / School Class",gd3:"Friends, school class, or club — shared gear split across group",grpSzLbl:"People:",gt1:"Mixed Ages",gt2:"Adults Only",gt3:"Kids + Adults",profTitle:"👤 Tell us about the primary user",fsec1:"Person",lAge:"Age",lHt:"Height (cm)",lWt:"Weight (kg)",fsec2:"Trip Details",lExp:"Experience",ePlc:"Select...",eF:"First time / School trip",eS:"Some experience",eE:"Experienced",lDays:"Trip Length",dPlc:"Select...",d1:"Day trip",d2:"2–3 days (overnight)",d7:"4–7 days",d14:"1 week+",lMonth:"Month of Trip",fsec3:"Destination",lDest:"City / Park / School Camp Name",lClimate:"Climate / Terrain",cMtn:"Mountain / Alpine",cDes:"Desert / Arid",cCst:"Coastal / Beach",cFor:"Forest / Temperate",cArc:"Arctic / Sub-zero",cTrp:"Tropical / Humid",btn2txt:"Next: Select Gear →",back:"Back",s3t:"Select Your Gear",infoBar:"✅ Green = must-haves · 🟠 School tag = required by most school programs · Uncheck items you already own.",btn3txt:"View My Kit →",extraBtn:"Can't find what you need? Browse specialty items",extraBtnTitle:"Can't find what you need? Browse specialty items",extraBtnSub:"Niche gear for special activities — most people won't need these",s4t:"🎒 Your Custom Gear Kit",estLbl:"estimated total",platPremium:"🏆 Premium & Specialty Outdoor",platMid:"📦 General & Fast Delivery",platBudget:"💰 Budget-Friendly Options",pt1:"US outdoor leader",pt2:"Expert staff picks",pt3:"Canada's outdoor co-op",pt4:"Prime delivery",pt5:"In-store pickup",pt6:"Same-day delivery",pt7:"Ultra-low prices",pt8:"Fashion & apparel",pt9:"Basic supplies",budgetNote:"💡 <strong>Budget tip:</strong> Temu and Shein are great for clothing layers, rain ponchos, gloves, and basic accessories. For safety-critical gear (helmets, sleeping bags for cold weather, harnesses), we recommend REI, MEC, or Amazon.",ckoBtn:"🛒 One-Click Checkout (Coming Soon)",printBtn:"🖨️ Print / Save as PDF",restartBtn:"← Start Over",ft1:"GearKit · Outdoor Gear, Simplified · © 2025",ft2:"Prices are estimates · Budget platforms (Temu/Shein) may vary in quality",recLbl:"Recommended",coldLbl:"Cold Weather",schoolLbl:"School Required",modalTitle:"🔍 Specialty & Niche Gear",modalNote:"These items are for specific needs — most campers won't need them. Links open product search pages.",modalCancel:"Cancel",modalAdd:"Add Selected to Kit →",
+actN:{camping:"Camping",hiking:"Hiking",skiing:"Skiing",cycling:"Cycling",kayaking:"Kayaking",climbing:"Climbing",surfing:"Surfing",running:"Trail Running",fishing:"Fishing",school:"School Camp"},
+tierN:{basic:"Essential",mid:"Comfort",premium:"Pro"},grpN:{solo:"Solo",family:"Family",group:"Group"},
+months:["January","February","March","April","May","June","July","August","September","October","November","December"],
+climate:{mountain:{c:"🏔️ Mountain temps drop fast — insulation and rain gear added as recommended.",w:"🏔️ Summer mountain days are warm but evenings cool — pack a mid-layer."},desert:{c:"🏜️ Desert winter nights are cold — thermal layers are essential.",w:"🏜️ Intense desert heat — sun protection and hydration gear are priorities."},coastal:{c:"🌊 Cold coast — waterproofing and wind layers recommended.",w:"🌊 Coastal trip — UV protection and quick-dry fabrics are key."},forest:{c:"🌲 Cooler forest months — avoid cotton, moisture-wicking layers critical.",w:"🌲 Forest camping — insect protection and lightweight layers."},arctic:{c:"🥶 Sub-zero environment — extreme cold gear and full windproofing prioritized.",w:"🥶 Arctic summer is unpredictable — full cold-weather kit still recommended."},tropical:{c:"🌴 Cooler tropical region — lightweight layers and rain jacket.",w:"🌴 Tropical heat — breathable fabrics, mosquito protection, high-SPF sunscreen."}}},
+
+zh:{heroTitle:"告别选装备的烦恼",heroSub:"选活动 → 选方案 → 勾装备 → 完成<br>不再花几小时跑遍十几个网站",p1:"⏱ 节省3小时以上",p2:"🎯 专家精选",p3:"🛒 一站下单",prg1:"活动",prg2:"方案",prg3:"装备",prg4:"清单",s1t:"选择运动类型",s1s:"专家精选装备清单，包含学校户外活动专项",btn1txt:"选好了，下一步 →",aCamping:"露营 Camping",aHiking:"登山徒步 Hiking",aSkiing:"滑雪 Skiing",aCycling:"骑行 Cycling",aKayak:"皮划艇 Kayaking",aClimb:"攀岩 Climbing",aSurf:"冲浪 Surfing",aRun:"越野跑 Trail Running",aFish:"钓鱼 Fishing",aSchool:"学校营地 School Camp",aPop:"最受欢迎",s2t:"选择配置方案",s2s:"选择预算档位、出行人数，并填写出行详情",budgetLbl:"预算档位",tb1:"入门款",tn1:"基础装备",td1:"经济实惠 — 借用、租借或购买平价装备，适合学校活动",tup:"起",tup2:"起",tup3:"起",popTag:"👍 最多人选",tb2:"进阶款",tn2:"进阶装备",td2:"品质与价格最佳平衡",tb3:"专业款",tn3:"高端装备",td3:"顶级材质工艺，适合资深户外爱好者",groupLbl:"人数与类型",gb1:"个人",gn1:"只有我",gd1:"个人装备清单",gb2:"家庭",gn2:"家庭出行",gd2:"家长+小孩，含儿童专属及共享装备",gb3:"多人",gn3:"多人/班级/团队",gd3:"朋友、学校班级或俱乐部，共享装备合理分配",grpSzLbl:"人数：",gt1:"混合年龄",gt2:"仅成人",gt3:"大人+小孩",profTitle:"👤 填写主要使用者信息",fsec1:"个人信息",lAge:"年龄",lHt:"身高 (cm)",lWt:"体重 (kg)",fsec2:"出行详情",lExp:"经验程度",ePlc:"请选择",eF:"第一次 / 学校活动",eS:"有一些经验",eE:"经验丰富",lDays:"出行天数",dPlc:"请选择",d1:"当天来回",d2:"2-3天（过夜）",d7:"4-7天",d14:"一周以上",lMonth:"出行月份",fsec3:"目的地",lDest:"城市/营地/公园名称",lClimate:"地区/气候",cMtn:"高山/高原",cDes:"沙漠/干旱",cCst:"海岸/沙滩",cFor:"森林/温带",cArc:"极地/极寒",cTrp:"热带/潮湿",btn2txt:"下一步，选装备 →",back:"返回",s3t:"勾选你需要的装备",infoBar:"✅ 绿色 = 必备 · 🟠 学校标签 = 北美大多数学校活动要求 · 已有的装备可取消勾选",btn3txt:"查看我的装备清单 →",extraBtnTitle:"找不到你需要的？浏览偏门特殊装备",extraBtnSub:"针对特殊需求的小众装备 — 大多数人不需要",s4t:"🎒 你的专属装备清单",estLbl:"预估总价",platPremium:"🏆 专业户外平台",platMid:"📦 综合平台",platBudget:"💰 平价选购",pt1:"北美顶级户外",pt2:"专业选品",pt3:"加拿大户外合作社",pt4:"Prime 快速配送",pt5:"门店自取",pt6:"当日送达",pt7:"超低价格",pt8:"服装配件首选",pt9:"基础用品",budgetNote:"💡 <strong>省钱建议：</strong>Temu 和 Shein 适合购买服装层次、雨衣、手套等基础配件。安全类装备（头盔、极寒睡袋、安全绳）建议在 REI、MEC 或 Amazon 购买以保证质量。",ckoBtn:"🛒 一键采购（即将上线）",printBtn:"🖨️ 打印/保存PDF",restartBtn:"← 重新规划",ft1:"GearKit · 一站式户外装备 · © 2025",ft2:"价格仅供参考 · Temu/Shein 商品质量可能参差不齐",recLbl:"推荐",coldLbl:"低温装备",schoolLbl:"学校必备",modalTitle:"🔍 特殊/偏门装备",modalNote:"以下为特定需求装备 — 大多数人不需要。链接将跳转至商品搜索页。",modalCancel:"取消",modalAdd:"加入装备清单 →",
+actN:{camping:"露营",hiking:"登山徒步",skiing:"滑雪",cycling:"骑行",kayaking:"皮划艇",climbing:"攀岩",surfing:"冲浪",running:"越野跑",fishing:"钓鱼",school:"学校营地"},
+tierN:{basic:"基础款",mid:"进阶款",premium:"专业款"},grpN:{solo:"个人",family:"家庭",group:"多人"},
+months:["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"],
+climate:{mountain:{c:"🏔️ 山地气温变化剧烈，已添加保暖层和防雨装备。",w:"🏔️ 夏季山地白天暖但夜晚凉，建议备一件中间层。"},desert:{c:"🏜️ 冬季沙漠夜晚寒冷，保暖底层必备。",w:"🏜️ 沙漠热力强烈，防晒和补水装备优先。"},coastal:{c:"🌊 寒冷海岸——防水和防风层已加入。",w:"🌊 海岸出行——防紫外线和速干面料是关键。"},forest:{c:"🌲 寒季森林——避免棉质，排湿底层至关重要。",w:"🌲 森林露营——驱虫和轻量层必备。"},arctic:{c:"🥶 极寒环境——已优先推荐极限保暖装备。",w:"🥶 极地夏季依然多变，建议备齐御寒装备。"},tropical:{c:"🌴 凉爽热带——轻量层和雨具。",w:"🌴 热带高温——透气面料、驱蚊和防晒必备。"}}},
+
+es:{heroTitle:"Equípate Sin Complicaciones",heroSub:"Elige actividad → Presupuesto → Equipo → ¡Listo!",p1:"⏱ Ahorra 3+ horas",p2:"🎯 Selección experta",p3:"🛒 Una compra",prg1:"Actividad",prg2:"Plan",prg3:"Equipo",prg4:"Resumen",s1t:"Elige Tu Actividad",s1s:"Listas de equipo para cada deporte, incluyendo campamentos escolares",btn1txt:"Elige una actividad →",aCamping:"Camping",aHiking:"Senderismo",aSkiing:"Esquí",aCycling:"Ciclismo",aKayak:"Kayak",aClimb:"Escalada",aSurf:"Surf",aRun:"Trail Running",aFish:"Pesca",aSchool:"Campamento Escolar",aPop:"Más Popular",s2t:"Elige Tu Plan",s2s:"Selecciona presupuesto, tipo de grupo y detalles del viaje",budgetLbl:"Nivel de Presupuesto",tb1:"Básico",tn1:"Kit Esencial",td1:"Económico — pedir prestado, alquilar o comprar barato",tup:" en adelante",tup2:" en adelante",tup3:" en adelante",popTag:"👍 El más elegido",tb2:"Intermedio",tn2:"Kit Confort",td2:"Mejor calidad-precio",tb3:"Premium",tn3:"Kit Pro",td3:"Materiales de primer nivel",groupLbl:"Tamaño y Tipo de Grupo",gb1:"Solo/a",gn1:"Solo yo",gd1:"Lista individual",gb2:"Familia",gn2:"Viaje Familiar",gd2:"Padres + niños",gb3:"Grupo",gn3:"Grupo / Clase",gd3:"Amigos, clase escolar o club",grpSzLbl:"Personas:",gt1:"Edades mixtas",gt2:"Solo adultos",gt3:"Adultos + niños",profTitle:"👤 Cuéntanos sobre el usuario principal",fsec1:"Persona",lAge:"Edad",lHt:"Altura (cm)",lWt:"Peso (kg)",fsec2:"Detalles del viaje",lExp:"Experiencia",ePlc:"Seleccionar...",eF:"Primera vez / Escuela",eS:"Algo de experiencia",eE:"Experimentado",lDays:"Duración",dPlc:"Seleccionar...",d1:"Excursión de día",d2:"2–3 días",d7:"4–7 días",d14:"1 semana+",lMonth:"Mes del viaje",fsec3:"Destino",lDest:"Ciudad / Parque / Campamento",lClimate:"Clima / Terreno",cMtn:"Montaña",cDes:"Desierto",cCst:"Costa",cFor:"Bosque",cArc:"Ártico",cTrp:"Tropical",btn2txt:"Siguiente: Equipo →",back:"Volver",s3t:"Selecciona Tu Equipo",infoBar:"✅ Verde = imprescindibles · Desmarca lo que ya tengas",btn3txt:"Ver Mi Kit →",extraBtnTitle:"¿No encuentras lo que buscas? Ver equipamiento especial",extraBtnSub:"Artículos especializados — la mayoría no los necesitará",s4t:"🎒 Tu Kit Personalizado",estLbl:"total estimado",platPremium:"🏆 Outdoor Premium",platMid:"📦 General",platBudget:"💰 Económicos",pt1:"Líder outdoor EE.UU.",pt2:"Selección de expertos",pt3:"Co-op outdoor de Canadá",pt4:"Entrega Prime",pt5:"Recogida en tienda",pt6:"Entrega el mismo día",pt7:"Precios muy bajos",pt8:"Ropa y accesorios",pt9:"Productos básicos",budgetNote:"💡 <strong>Consejo:</strong> Temu y Shein son ideales para ropa, chubasqueros y accesorios básicos. Para equipamiento de seguridad, recomendamos REI, MEC o Amazon.",ckoBtn:"🛒 Compra en un clic (Próx.)",printBtn:"🖨️ Imprimir / PDF",restartBtn:"← Empezar de nuevo",ft1:"GearKit · Equipo Outdoor, Simplificado · © 2025",ft2:"Precios estimados · La calidad en plataformas económicas puede variar",recLbl:"Recomendado",coldLbl:"Frío",schoolLbl:"Requerido escuela",modalTitle:"🔍 Equipamiento Especial",modalNote:"Artículos para necesidades específicas. La mayoría no los necesitará.",modalCancel:"Cancelar",modalAdd:"Añadir al kit →",
+actN:{camping:"Camping",hiking:"Senderismo",skiing:"Esquí",cycling:"Ciclismo",kayaking:"Kayak",climbing:"Escalada",surfing:"Surf",running:"Trail Running",fishing:"Pesca",school:"Campamento Escolar"},
+tierN:{basic:"Esencial",mid:"Confort",premium:"Pro"},grpN:{solo:"Solo/a",family:"Familia",group:"Grupo"},
+months:["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"],
+climate:{mountain:{c:"🏔️ Cambios bruscos en montaña — capas de abrigo e impermeable añadidos.",w:"🏔️ Días cálidos, noches frías — lleva una capa intermedia."},desert:{c:"🏜️ Noches frías en el desierto — capas térmicas esenciales.",w:"🏜️ Calor intenso — protección solar e hidratación prioritarias."},coastal:{c:"🌊 Costa fría — impermeabilidad y cortavientos.",w:"🌊 Costa — UV y tejidos secado rápido."},forest:{c:"🌲 Bosque fresco — evita el algodón.",w:"🌲 Bosque — antimosquitos y capas ligeras."},arctic:{c:"🥶 Bajo cero — frío extremo prioritario.",w:"🥶 Verano ártico impredecible."},tropical:{c:"🌴 Tropical fresco — capas ligeras y chubasquero.",w:"🌴 Calor tropical — transpirable, antimosquitos, protector solar."}}},
+
+ar:{heroTitle:"جهّز نفسك بدون تعقيد",heroSub:"اختر النشاط ← الميزانية ← المعدات ← انتهيت!",p1:"⏱ وفّر أكثر من 3 ساعات",p2:"🎯 توصيات خبراء",p3:"🛒 طلب واحد",prg1:"النشاط",prg2:"الخطة",prg3:"المعدات",prg4:"الملخص",s1t:"اختر نشاطك",s1s:"قوائم معدات متخصصة لكل رياضة، بما فيها المخيمات المدرسية",btn1txt:"اختر نشاطاً ←",aCamping:"التخييم",aHiking:"المشي الجبلي",aSkiing:"التزلج",aCycling:"ركوب الدراجات",aKayak:"الكاياك",aClimb:"تسلق الجبال",aSurf:"ركوب الأمواج",aRun:"الجري الطبيعي",aFish:"الصيد",aSchool:"المخيم المدرسي",aPop:"الأكثر شعبية",s2t:"اختر خطتك",s2s:"حدد الميزانية ونوع المجموعة وتفاصيل الرحلة",budgetLbl:"مستوى الميزانية",tb1:"أساسي",tn1:"طقم أساسي",td1:"اقتصادي — استعر أو استأجر أو اشترِ بسعر مناسب",tup:" فأكثر",tup2:" فأكثر",tup3:" فأكثر",popTag:"👍 الأكثر اختياراً",tb2:"متوسط",tn2:"طقم مريح",td2:"أفضل قيمة",tb3:"احترافي",tn3:"طقم المحترفين",td3:"مواد عالية الجودة",groupLbl:"حجم المجموعة ونوعها",gb1:"فردي",gn1:"أنا وحدي",gd1:"قائمة فردية",gb2:"عائلي",gn2:"رحلة عائلية",gd2:"آباء + أطفال",gb3:"مجموعة",gn3:"مجموعة / فصل دراسي",gd3:"أصدقاء أو فصل أو نادٍ",grpSzLbl:"عدد الأشخاص:",gt1:"أعمار مختلطة",gt2:"بالغون فقط",gt3:"بالغون + أطفال",profTitle:"👤 أخبرنا عن المستخدم الرئيسي",fsec1:"المستخدم",lAge:"العمر",lHt:"الطول (سم)",lWt:"الوزن (كغ)",fsec2:"تفاصيل الرحلة",lExp:"مستوى الخبرة",ePlc:"اختر...",eF:"أول مرة / رحلة مدرسية",eS:"بعض الخبرة",eE:"خبير",lDays:"مدة الرحلة",dPlc:"اختر...",d1:"يوم واحد",d2:"يومان إلى 3",d7:"4-7 أيام",d14:"أسبوع+",lMonth:"شهر الرحلة",fsec3:"الوجهة",lDest:"المدينة / المتنزه / المخيم",lClimate:"المنطقة / المناخ",cMtn:"جبلي",cDes:"صحراوي",cCst:"ساحلي",cFor:"غابات",cArc:"قطبي",cTrp:"استوائي",btn2txt:"التالي: المعدات ←",back:"رجوع",s3t:"اختر معداتك",infoBar:"✅ الأخضر = ضروري · أزل التحديد عما تملكه مسبقاً",btn3txt:"عرض طقمي ←",extraBtnTitle:"لم تجد ما تبحث عنه؟ تصفح المعدات المتخصصة",extraBtnSub:"معدات للاحتياجات الخاصة — معظم الناس لن يحتاجوها",s4t:"🎒 طقمك المخصص",estLbl:"الإجمالي التقديري",platPremium:"🏆 منصات احترافية",platMid:"📦 منصات عامة",platBudget:"💰 خيارات اقتصادية",pt1:"رائد التخييم الأمريكي",pt2:"توصيات الخبراء",pt3:"تعاونية كندا للهواء الطلق",pt4:"توصيل Prime",pt5:"استلام من المتجر",pt6:"توصيل نفس اليوم",pt7:"أسعار منخفضة جداً",pt8:"ملابس وإكسسوارات",pt9:"مستلزمات أساسية",budgetNote:"💡 <strong>نصيحة للتوفير:</strong> Temu و Shein مثاليان للملابس والمعاطف وملحقات بسيطة. للمعدات الأمنية استخدم REI أو MEC أو Amazon.",ckoBtn:"🛒 شراء بنقرة (قريباً)",printBtn:"🖨️ طباعة / PDF",restartBtn:"← البداية من جديد",ft1:"GearKit · معدات الهواء الطلق · © 2025",ft2:"الأسعار تقديرية · قد تتفاوت جودة المنصات الاقتصادية",recLbl:"موصى به",coldLbl:"مناخ بارد",schoolLbl:"مطلوب مدرسياً",modalTitle:"🔍 معدات متخصصة",modalNote:"هذه العناصر لاحتياجات خاصة. معظم المخيمين لن يحتاجوها.",modalCancel:"إلغاء",modalAdd:"إضافة إلى الطقم ←",
+actN:{camping:"التخييم",hiking:"المشي الجبلي",skiing:"التزلج",cycling:"ركوب الدراجات",kayaking:"الكاياك",climbing:"تسلق الجبال",surfing:"ركوب الأمواج",running:"الجري الطبيعي",fishing:"الصيد",school:"المخيم المدرسي"},
+tierN:{basic:"أساسي",mid:"مريح",premium:"احترافي"},grpN:{solo:"فردي",family:"عائلي",group:"مجموعة"},
+months:["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"],
+climate:{mountain:{c:"🏔️ تغيرات حادة في الجبال — طبقات دفء ومعدات مطر.",w:"🏔️ أيام دافئة وليالٍ باردة — خذ طبقة وسطى."},desert:{c:"🏜️ ليالٍ باردة في الصحراء — طبقات حرارية ضرورية.",w:"🏜️ حرارة شديدة — حماية شمس وترطيب."},coastal:{c:"🌊 ساحل بارد — معدات مقاومة للماء.",w:"🌊 حماية UV وأقمشة سريعة الجفاف."},forest:{c:"🌲 غابة باردة — تجنب القطن.",w:"🌲 حماية من الحشرات وملابس خفيفة."},arctic:{c:"🥶 تحت الصفر — معدات برد قصوى.",w:"🥶 صيف قطبي غير متوقع."},tropical:{c:"🌴 استوائي معتدل — طبقات خفيفة ومعطف مطر.",w:"🌴 حرارة استوائية — تنفس وطارد حشرات."}}}
+};
+
+/* ══════════════════════ ACTIVITY DATA ══════════════════════ */
+const ACTS=[
+  {id:'camping',icon:'⛺',img:'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=200&q=60',popular:true},
+  {id:'hiking',icon:'🥾',img:'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=200&q=60'},
+  {id:'skiing',icon:'⛷️',img:'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=200&q=60'},
+  {id:'cycling',icon:'🚴',img:'https://images.unsplash.com/photo-1534787238916-9ba6764efd4f?w=200&q=60'},
+  {id:'kayaking',icon:'🛶',img:'https://images.unsplash.com/photo-1526761122248-c31c93f8b2b9?w=200&q=60'},
+  {id:'climbing',icon:'🧗',img:'https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=200&q=60'},
+  {id:'surfing',icon:'🏄',img:'https://images.unsplash.com/photo-1509914398892-963f53e6e2f1?w=200&q=60'},
+  {id:'running',icon:'🏃',img:'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=200&q=60'},
+  {id:'fishing',icon:'🎣',img:'https://images.unsplash.com/photo-1559827291-72ee739d0d9a?w=200&q=60'},
+  {id:'school',icon:'🏕️',img:'https://images.unsplash.com/photo-1476231682828-37e571bc172f?w=200&q=60'},
+];
+
+/* ══════════════════════ GEAR DATA ══════════════════════
+   Fields: cat, nm (English), nmZh (Chinese), br, pr, rec, cold, school, budgetAlt, emoji, searchUrl
+   school = required by North American school programs (based on Strathcona Lodge + ACA + Canadian school data)
+══════════════════════════════════════════════════════ */
+const GEAR={
+camping:{
+basic:[
+  {cat:'⛺ Sleep System',emoji:'🏕️',nm:'2-Person Tent (2000mm waterproof)',nmZh:'双人帐篷（2000mm防水）',br:'Naturehike / Amazon Basics',pr:55,rec:1,school:1,budgetAlt:'Temu ~$25',searchUrl:'https://www.amazon.ca/s?k=camping+tent+2+person&tag=gearkit07-20'},
+  {cat:'⛺ Sleep System',emoji:'😴',nm:'Sleeping Bag (comfort 41°F / 5°C) — NO COTTON fill',nmZh:'睡袋（舒适温度5°C）—避免棉填充',br:'Decathlon / Coleman',pr:45,rec:1,school:1,cold:1,budgetAlt:'Temu ~$20',searchUrl:'https://www.rei.com/search?q=sleeping+bag+5c'},
+  {cat:'⛺ Sleep System',emoji:'🛏️',nm:'Sleeping Pad — inflatable or closed-cell foam',nmZh:'防潮垫 — 充气或闭孔泡沫款',br:'Decathlon / Therm-a-Rest',pr:25,rec:1,school:1,searchUrl:'https://www.rei.com/search?q=sleeping+pad'},
+  {cat:'⛺ Sleep System',emoji:'💨',nm:'Stuff Sack × 2 (for sleeping bag + pad)',nmZh:'收纳袋 × 2（睡袋和防潮垫各一）',br:'Sea to Summit / Amazon',pr:12,rec:1,school:1,searchUrl:'https://www.amazon.ca/s?k=stuff+sack&tag=gearkit07-20'},
+  {cat:'🧥 Clothing — No Cotton!',emoji:'🧥',nm:'Waterproof Jacket & Pants (NOT "water resistant")',nmZh:'防水外套 + 防水裤（必须100%防水，非"防泼水"）',br:'Decathlon / Columbia',pr:65,rec:1,school:1,cold:1,budgetAlt:'Temu ~$18',searchUrl:'https://www.amazon.ca/s?k=waterproof+rain+jacket+pants&tag=gearkit07-20'},
+  {cat:'🧥 Clothing — No Cotton!',emoji:'🧣',nm:'Wool/Fleece Mid-Layer Jacket × 2',nmZh:'羊毛/抓绒中间层外套 × 2',br:'Decathlon / Patagonia',pr:35,rec:1,school:1,cold:1,budgetAlt:'Temu ~$12',searchUrl:'https://www.amazon.ca/s?k=fleece+jacket+outdoor&tag=gearkit07-20'},
+  {cat:'🧥 Clothing — No Cotton!',emoji:'👕',nm:'Moisture-Wicking Base Layer Top + Bottom (wool/synthetic)',nmZh:'速干排汗底层（上衣+下装）— 羊毛或合成材质',br:'Smartwool / Icebreaker / Decathlon',pr:40,rec:1,school:1,cold:1,budgetAlt:'Temu ~$10',searchUrl:'https://www.amazon.ca/s?k=moisture+wicking+base+layer&tag=gearkit07-20'},
+  {cat:'🧥 Clothing — No Cotton!',emoji:'🧦',nm:'Wool Socks × 3 pairs (1 wet activity, 1 camp, 1 sleep)',nmZh:'羊毛袜 × 3双（1双水上，1双营地，1双睡眠专用）',br:'Darn Tough / Smartwool',pr:35,rec:1,school:1,budgetAlt:'Temu ~$8',searchUrl:'https://www.amazon.ca/s?k=wool+hiking+socks&tag=gearkit07-20'},
+  {cat:'🧥 Clothing — No Cotton!',emoji:'🩳',nm:'Synthetic/Quick-dry Pants (no jeans/cotton)',nmZh:'速干裤（禁止牛仔裤或棉质）',br:'Decathlon / MEC',pr:28,rec:1,school:1,searchUrl:'https://www.amazon.ca/s?k=quick+dry+pants&tag=gearkit07-20'},
+  {cat:'🧢 Headwear & Protection',emoji:'🧢',nm:'Sun Hat / Baseball Cap',nmZh:'遮阳帽',br:'Any',pr:10,rec:1,school:1,budgetAlt:'Temu ~$3',searchUrl:'https://www.amazon.ca/s?k=sun+hat&tag=gearkit07-20'},
+  {cat:'🧢 Headwear & Protection',emoji:'🎿',nm:'Warm Toque (fleece/wool hat) + Gloves',nmZh:'保暖毛线帽（抓绒/羊毛）+ 手套',br:'Any / Decathlon',pr:15,rec:1,school:1,cold:1,budgetAlt:'Temu ~$5',searchUrl:'https://www.amazon.ca/s?k=warm+hat+gloves+set&tag=gearkit07-20'},
+  {cat:'🧢 Headwear & Protection',emoji:'🕶️',nm:'Sunglasses with retention strap',nmZh:'太阳镜（含挂绳，防止掉落）',br:'Any',pr:15,rec:1,school:1,searchUrl:'https://www.amazon.ca/s?k=sunglasses+retention+strap&tag=gearkit07-20'},
+  {cat:'👟 Footwear',emoji:'👟',nm:'Closed-toe Hiking Shoes (supportive, no slip-ons/Crocs)',nmZh:'封闭式登山鞋（防滑，不可穿洞洞鞋）',br:'Decathlon / Salomon',pr:55,rec:1,school:1,searchUrl:'https://www.rei.com/search?q=hiking+shoes'},
+  {cat:'👟 Footwear',emoji:'🥿',nm:'Dry Camp Shoes (separate pair)',nmZh:'营地备用干燥鞋（单独一双）',br:'Any',pr:12,rec:1,school:1,budgetAlt:'Temu ~$8',searchUrl:'https://www.amazon.ca/s?k=camp+shoes&tag=gearkit07-20'},
+  {cat:'🎒 Packs',emoji:'🎒',nm:'Day Pack (25–35L)',nmZh:'日用背包（25–35升）',br:'Decathlon / Osprey',pr:35,rec:1,school:1,searchUrl:'https://www.rei.com/search?q=daypack'},
+  {cat:'💡 Lighting',emoji:'🔦',nm:'Headlamp with spare batteries',nmZh:'头灯（附备用电池）',br:'Petzl / Black Diamond',pr:22,rec:1,school:1,budgetAlt:'Temu ~$6',searchUrl:'https://www.amazon.ca/s?k=headlamp+camping&tag=gearkit07-20'},
+  {cat:'💧 Hydration',emoji:'💧',nm:'1L Water Bottle (must seal upside-down, no straw)',nmZh:'1升水壶（必须可倒置密封，不建议吸管款）',br:'Nalgene / Hydro Flask',pr:15,rec:1,school:1,budgetAlt:'Temu ~$5',searchUrl:'https://www.amazon.ca/s?k=nalgene+water+bottle&tag=gearkit07-20'},
+  {cat:'🧴 Personal Care',emoji:'🧴',nm:'Toiletries: soap, shampoo, toothbrush, toothpaste',nmZh:'洗漱用品：肥皂、洗发水、牙刷、牙膏',br:'Any',pr:12,rec:1,school:1,budgetAlt:'Dollar Tree',searchUrl:'https://www.amazon.ca/s?k=camp+toiletries&tag=gearkit07-20'},
+  {cat:'🧴 Personal Care',emoji:'☀️',nm:'Sunscreen SPF 45+ (water resistant)',nmZh:'防晒霜 SPF 45+（防水型）',br:'Neutrogena / Coppertone',pr:10,rec:1,school:1,budgetAlt:'Dollarama ~$2',searchUrl:'https://www.amazon.ca/s?k=sunscreen+spf+50&tag=gearkit07-20'},
+  {cat:'🧴 Personal Care',emoji:'🦟',nm:'Insect Repellent (DEET or Picaridin) — May to October',nmZh:'驱虫喷雾（含DEET或Picaridin）— 5月至10月必备',br:'OFF! / Sawyer',pr:8,rec:1,school:1,budgetAlt:'Dollarama ~$2',searchUrl:'https://www.amazon.ca/s?k=insect+repellent+deet&tag=gearkit07-20'},
+  {cat:'🛡️ Safety & Organization',emoji:'🚑',nm:'First Aid Kit (basic)',nmZh:'基础急救包',br:'Adventure Medical / St. John',pr:18,rec:1,school:1,searchUrl:'https://www.amazon.ca/s?k=first+aid+kit+camping&tag=gearkit07-20'},
+  {cat:'🛡️ Safety & Organization',emoji:'🗑️',nm:'5 Large Garbage Bags (waterproofing gear)',nmZh:'5个大垃圾袋（用于防水保护装备）',br:'Any',pr:3,rec:1,school:1,budgetAlt:'Dollarama $1',searchUrl:'https://www.amazon.ca/s?k=large+garbage+bags&tag=gearkit07-20'},
+  {cat:'🛡️ Safety & Organization',emoji:'📦',nm:'Zip-loc bags (assorted, for waterproofing small items)',nmZh:'密封袋（各种尺寸，防水保护小物品）',br:'Any',pr:4,rec:1,school:1,budgetAlt:'Dollarama $1',searchUrl:'https://www.amazon.ca/s?k=ziploc+bags&tag=gearkit07-20'},
+  {cat:'🍽️ Cooking & Eating',emoji:'🥣',nm:'Unbreakable cup, bowl & spoon (camp dining set)',nmZh:'防摔餐具套装（杯子、碗、勺子）',br:'Decathlon / Sea to Summit',pr:14,rec:1,school:1,budgetAlt:'Temu ~$6',searchUrl:'https://www.amazon.ca/s?k=camping+mess+kit&tag=gearkit07-20'},
+  {cat:'🍽️ Cooking & Eating',emoji:'🔥',nm:'Portable Stove + Gas Canisters × 2',nmZh:'便携炉头 + 气罐 × 2',br:'MSR PocketRocket / Fire-Maple',pr:42,rec:0,searchUrl:'https://www.rei.com/search?q=backpacking+stove'},
+  {cat:'🍽️ Cooking & Eating',emoji:'🍳',nm:'Aluminum Cookset (pot + pan)',nmZh:'铝合金炊具套装（锅 + 平底锅）',br:'Naturehike / GSI',pr:28,rec:0,searchUrl:'https://www.amazon.ca/s?k=camping+cookset&tag=gearkit07-20'},
+  {cat:'⌚ Other Essentials',emoji:'⌚',nm:'Watch with alarm (NO cell phones at camp)',nmZh:'带闹铃的手表（营地不允许带手机）',br:'Casio / Any',pr:18,rec:1,school:1,budgetAlt:'Temu ~$8',searchUrl:'https://www.amazon.ca/s?k=digital+watch+alarm&tag=gearkit07-20'},
+  {cat:'⌚ Other Essentials',emoji:'🏊',nm:'Bathing Suit',nmZh:'泳衣',br:'Any',pr:15,rec:1,school:1,budgetAlt:'Shein ~$10',searchUrl:'https://www.amazon.ca/s?k=swimming+suit&tag=gearkit07-20'},
+  {cat:'⌚ Other Essentials',emoji:'🪖',nm:'Bug Shirt or Mosquito Head Net (May–Oct)',nmZh:'防虫衬衫或头网（5月至10月推荐）',br:'Decathlon / Coghlan\'s',pr:18,rec:0,searchUrl:'https://www.amazon.ca/s?k=bug+shirt+mosquito+net&tag=gearkit07-20'},
+],
+mid:[
+  {cat:'⛺ Sleep System',emoji:'🏕️',nm:'4-Season Tent — aluminum poles, freestanding',nmZh:'四季帐篷 — 铝杆，独立式',br:'MSR Hubba Hubba / REI',pr:420,rec:1,searchUrl:'https://www.rei.com/search?q=4+season+tent'},
+  {cat:'⛺ Sleep System',emoji:'😴',nm:'Down Sleeping Bag -5°C / 23°F',nmZh:'鹅绒睡袋（-5°C / 23°F）',br:'Rab Neutrino / Marmot',pr:310,rec:1,cold:1,searchUrl:'https://www.rei.com/search?q=sleeping+bag+-5'},
+  {cat:'⛺ Sleep System',emoji:'🛏️',nm:'Self-Inflating Sleeping Pad R4.0',nmZh:'自充气睡垫 R4.0',br:'Sea to Summit / Therm-a-Rest',pr:170,rec:1,searchUrl:'https://www.rei.com/search?q=self+inflating+sleeping+pad'},
+  {cat:'🧥 Clothing',emoji:'🧥',nm:'Gore-Tex / Waterproof Shell Jacket',nmZh:'Gore-Tex 防水外壳夹克',br:"Arc'teryx Beta / Marmot",pr:280,rec:1,cold:1,searchUrl:'https://www.rei.com/search?q=waterproof+shell+jacket'},
+  {cat:'🧥 Clothing',emoji:'🧶',nm:'Merino Wool Base Layer Set (top + bottom)',nmZh:'美利奴羊毛底层套装（上衣+下装）',br:'Icebreaker / Smartwool',pr:160,rec:1,cold:1,searchUrl:'https://www.rei.com/search?q=merino+wool+base+layer'},
+  {cat:'🧥 Clothing',emoji:'🫧',nm:'Fleece Mid-Layer + Softshell Pants',nmZh:'抓绒中层 + 软壳裤',br:'Patagonia / The North Face',pr:140,rec:1,searchUrl:'https://www.rei.com/search?q=fleece+jacket'},
+  {cat:'🎒 Packs',emoji:'🎒',nm:'55L Frame Backpack with hip belt',nmZh:'55升铝框背包（含腰带）',br:'Osprey Atmos AG / Gregory',pr:480,rec:1,searchUrl:'https://www.rei.com/search?q=osprey+55l'},
+  {cat:'💡 Lighting',emoji:'🔦',nm:'Rechargeable Headlamp 450+ lumens',nmZh:'充电头灯 450+ 流明',br:'Petzl Actik Core / Black Diamond',pr:95,rec:1,searchUrl:'https://www.rei.com/search?q=rechargeable+headlamp'},
+  {cat:'💧 Hydration',emoji:'💧',nm:'Insulated Water Bottle 32oz',nmZh:'保温水壶 1L',br:'Hydro Flask / Nalgene',pr:38,rec:1,searchUrl:'https://www.rei.com/search?q=insulated+water+bottle'},
+  {cat:'👟 Footwear',emoji:'👟',nm:'Waterproof Hiking Boot (broken in) GTX',nmZh:'防水登山靴（需提前磨合）',br:'Salomon X Ultra / HOKA',pr:195,rec:1,searchUrl:'https://www.rei.com/search?q=waterproof+hiking+boot'},
+  {cat:'🛡️ Safety',emoji:'🚑',nm:'Comprehensive First Aid Kit',nmZh:'综合急救包',br:'Adventure Medical / MyMedic',pr:58,rec:1,searchUrl:'https://www.rei.com/search?q=first+aid+kit'},
+  {cat:'🛡️ Safety',emoji:'📡',nm:'Personal Locator Beacon (PLB)',nmZh:'个人定位信标（PLB）',br:'Garmin inReach Mini / SPOT',pr:380,rec:0,searchUrl:'https://www.rei.com/search?q=personal+locator+beacon'},
+],
+premium:[
+  {cat:'⛺ Sleep System',emoji:'🏕️',nm:'Ultralight Tent 1.3kg — titanium/carbon poles',nmZh:'超轻帐篷 1.3kg — 钛/碳纤维杆',br:'Hilleberg / Big Agnes',pr:1050,rec:1,searchUrl:'https://www.rei.com/search?q=ultralight+tent'},
+  {cat:'⛺ Sleep System',emoji:'😴',nm:'Premium Down Bag -10°C / 14°F',nmZh:'顶级鹅绒睡袋 -10°C',br:'Western Mountaineering / Feathered Friends',pr:780,rec:1,cold:1,searchUrl:'https://www.rei.com/search?q=down+sleeping+bag+-10'},
+  {cat:'⛺ Sleep System',emoji:'🛏️',nm:'R6.0 Inflatable Sleeping Pad',nmZh:'R6.0 充气睡垫',br:'Therm-a-Rest NeoAir XTherm',pr:295,rec:1,searchUrl:'https://www.rei.com/search?q=therm+a+rest+neoair'},
+  {cat:'🧥 Clothing',emoji:'🧥',nm:'Gore-Tex Pro Shell Jacket',nmZh:'Gore-Tex Pro 专业外壳夹克',br:"Arc'teryx Alpha SV",pr:920,rec:1,cold:1,searchUrl:'https://www.rei.com/search?q=gore+tex+pro+jacket'},
+  {cat:'🧥 Clothing',emoji:'🧶',nm:'Ultralight Down Mid-Layer',nmZh:'超轻羽绒中间层',br:'Patagonia Down Sweater / Arc\'teryx',pr:310,rec:1,cold:1,searchUrl:'https://www.rei.com/search?q=ultralight+down+jacket'},
+  {cat:'🎒 Packs',emoji:'🎒',nm:'65L Carbon-frame Backpack',nmZh:'65升碳纤维框架背包',br:"Arc'teryx Bora / Hyperlite",pr:880,rec:1,searchUrl:'https://www.rei.com/search?q=65l+backpack'},
+  {cat:'🛡️ Safety',emoji:'📡',nm:'Satellite Communicator + GPS',nmZh:'卫星通讯设备 + GPS',br:'Garmin inReach Explorer+',pr:600,rec:1,searchUrl:'https://www.rei.com/search?q=garmin+inreach'},
+  {cat:'💡 Lighting',emoji:'🔦',nm:'Rechargeable Headlamp 1000+ lumens',nmZh:'充电头灯 1000+ 流明',br:'Petzl Nao+ RL',pr:185,rec:1,searchUrl:'https://www.rei.com/search?q=headlamp+1000+lumen'},
+]
+},
+school:{
+basic:[
+  {cat:'🏕️ School Camp Essentials',emoji:'🧥',nm:'Waterproof Jacket + Pants (MUST be waterproof, not resistant)',nmZh:'防水外套+防水裤（必须100%防水，非防泼水）',br:'Decathlon / Columbia',pr:55,rec:1,school:1,budgetAlt:'Temu ~$18',searchUrl:'https://www.amazon.ca/s?k=waterproof+rain+gear+kids&tag=gearkit07-20'},
+  {cat:'🏕️ School Camp Essentials',emoji:'😴',nm:'Sleeping Bag -7°C or warmer (NO cotton fill)',nmZh:'睡袋 -7°C或更暖（禁止棉填充）',br:'Coleman / MEC',pr:45,rec:1,school:1,cold:1,budgetAlt:'Temu ~$25',searchUrl:'https://www.amazon.ca/s?k=sleeping+bag+-7c+kids&tag=gearkit07-20'},
+  {cat:'🏕️ School Camp Essentials',emoji:'🛏️',nm:'Sleeping Pad — inflatable or closed-cell foam',nmZh:'防潮垫 — 充气或泡沫款',br:'Decathlon / Therm-a-Rest',pr:22,rec:1,school:1,searchUrl:'https://www.amazon.ca/s?k=sleeping+pad+kids&tag=gearkit07-20'},
+  {cat:'🏕️ School Camp Essentials',emoji:'🧢',nm:'Toque (warm hat) + Gloves — wool/fleece',nmZh:'保暖帽（羊毛/抓绒）+ 手套',br:'Any',pr:12,rec:1,school:1,cold:1,budgetAlt:'Temu ~$5',searchUrl:'https://www.amazon.ca/s?k=kids+warm+hat+gloves&tag=gearkit07-20'},
+  {cat:'🏕️ School Camp Essentials',emoji:'👟',nm:'Closed-toe Supportive Shoes (no Crocs/flip-flops)',nmZh:'封闭式支撑鞋（不可穿洞洞鞋/拖鞋）',br:'Decathlon / Skechers',pr:45,rec:1,school:1,searchUrl:'https://www.amazon.ca/s?k=kids+hiking+shoes&tag=gearkit07-20'},
+  {cat:'🏕️ School Camp Essentials',emoji:'🔦',nm:'Headlamp with extra batteries',nmZh:'头灯（附备用电池）',br:'Petzl / Black Diamond',pr:18,rec:1,school:1,budgetAlt:'Temu ~$6',searchUrl:'https://www.amazon.ca/s?k=kids+headlamp&tag=gearkit07-20'},
+  {cat:'🏕️ School Camp Essentials',emoji:'💧',nm:'1L Water Bottle (leakproof, NO straw bottles)',nmZh:'1升防漏水壶（不建议吸管款）',br:'Nalgene / Camelbak',pr:14,rec:1,school:1,budgetAlt:'Temu ~$5',searchUrl:'https://www.amazon.ca/s?k=nalgene+kids+water+bottle&tag=gearkit07-20'},
+  {cat:'🏕️ School Camp Essentials',emoji:'☀️',nm:'Sunscreen SPF 45+ (water resistant)',nmZh:'防晒霜 SPF 45+（防水型）',br:'Neutrogena / Coppertone Kids',pr:8,rec:1,school:1,budgetAlt:'Dollarama ~$2',searchUrl:'https://www.amazon.ca/s?k=kids+sunscreen+spf+50&tag=gearkit07-20'},
+  {cat:'🏕️ School Camp Essentials',emoji:'🦟',nm:'Insect Repellent (DEET-based for BC forests)',nmZh:'驱虫喷雾（BC省森林适用含DEET）',br:'OFF! / Muskol',pr:7,rec:1,school:1,budgetAlt:'Dollarama ~$2',searchUrl:'https://www.amazon.ca/s?k=insect+repellent+kids&tag=gearkit07-20'},
+  {cat:'🏕️ School Camp Essentials',emoji:'⌚',nm:'Watch with alarm — NO phones allowed at camp',nmZh:'带闹铃手表 — 营地不允许手机',br:'Casio',pr:15,rec:1,school:1,budgetAlt:'Temu ~$8',searchUrl:'https://www.amazon.ca/s?k=casio+kids+watch&tag=gearkit07-20'},
+  {cat:'🏕️ School Camp Essentials',emoji:'🩱',nm:'Bathing Suit',nmZh:'泳衣',br:'Any',pr:12,rec:1,school:1,budgetAlt:'Shein ~$8',searchUrl:'https://www.amazon.ca/s?k=kids+bathing+suit&tag=gearkit07-20'},
+  {cat:'🧥 Clothing (No Cotton Rule!)',emoji:'👕',nm:'Synthetic/Wool Base Layers (top + bottom)',nmZh:'合成纤维/羊毛底层（上衣+下装）',br:'Decathlon / Smartwool',pr:32,rec:1,school:1,cold:1,budgetAlt:'Temu ~$10',searchUrl:'https://www.amazon.ca/s?k=kids+thermal+base+layer&tag=gearkit07-20'},
+  {cat:'🧥 Clothing (No Cotton Rule!)',emoji:'🧣',nm:'Fleece or Wool Mid-Layer Tops × 2',nmZh:'抓绒或羊毛中间层 × 2件',br:'Decathlon / Columbia',pr:28,rec:1,school:1,cold:1,budgetAlt:'Temu ~$10',searchUrl:'https://www.amazon.ca/s?k=kids+fleece+jacket&tag=gearkit07-20'},
+  {cat:'🧥 Clothing (No Cotton Rule!)',emoji:'👖',nm:'Fleece or Wool Pants (mid-layer)',nmZh:'抓绒或羊毛长裤（中间层）',br:'Decathlon',pr:22,rec:1,school:1,cold:1,budgetAlt:'Temu ~$10',searchUrl:'https://www.amazon.ca/s?k=kids+fleece+pants&tag=gearkit07-20'},
+  {cat:'🧥 Clothing (No Cotton Rule!)',emoji:'🧦',nm:'Wool Socks × 3 pairs (1 water, 1 camp, 1 sleep)',nmZh:'羊毛袜 × 3双（1双水上，1双营地，1双睡眠）',br:'Smartwool / Darn Tough',pr:28,rec:1,school:1,budgetAlt:'Temu ~$8',searchUrl:'https://www.amazon.ca/s?k=kids+wool+socks&tag=gearkit07-20'},
+  {cat:'🧥 Clothing (No Cotton Rule!)',emoji:'🧤',nm:'Synthetic Puffy / Fill Jacket',nmZh:'合成纤维保暖羽绒夹克',br:'Decathlon / MEC',pr:35,rec:1,school:1,cold:1,budgetAlt:'Temu ~$15',searchUrl:'https://www.amazon.ca/s?k=kids+puffy+jacket&tag=gearkit07-20'},
+  {cat:'🎒 Packs & Organization',emoji:'🎒',nm:'Duffel Bag or Backpack (all gear must fit inside)',nmZh:'旅行包或背包（所有装备必须装进去）',br:'Any',pr:25,rec:1,school:1,budgetAlt:'Temu ~$12',searchUrl:'https://www.amazon.ca/s?k=duffel+bag+kids+camping&tag=gearkit07-20'},
+  {cat:'🎒 Packs & Organization',emoji:'📦',nm:'5 Large Garbage Bags (gear waterproofing)',nmZh:'5个大垃圾袋（防水保护）',br:'Any',pr:3,rec:1,school:1,budgetAlt:'Dollarama $1',searchUrl:'https://www.amazon.ca/s?k=large+garbage+bags&tag=gearkit07-20'},
+  {cat:'🎒 Packs & Organization',emoji:'🗂️',nm:'Zip-loc bags assorted (medication, small items)',nmZh:'密封袋（装药物和小物品）',br:'Any',pr:3,rec:1,school:1,budgetAlt:'Dollarama $1',searchUrl:'https://www.amazon.ca/s?k=ziploc+bags+assorted&tag=gearkit07-20'},
+  {cat:'🍽️ Eating',emoji:'🥣',nm:'Unbreakable Cup, Bowl & Spoon',nmZh:'防摔杯子、碗和勺子',br:'Sea to Summit / GSI',pr:14,rec:1,school:1,budgetAlt:'Temu ~$5',searchUrl:'https://www.amazon.ca/s?k=camping+mess+kit+kids&tag=gearkit07-20'},
+  {cat:'🧴 Hygiene',emoji:'🧼',nm:'Soap + Shower Towel (quick-dry)',nmZh:'肥皂 + 速干浴巾',br:'Any',pr:10,rec:1,school:1,budgetAlt:'Dollarama ~$3',searchUrl:'https://www.amazon.ca/s?k=quick+dry+towel+camping&tag=gearkit07-20'},
+  {cat:'💊 Health',emoji:'💊',nm:'Personal Medication (in waterproof bag, labelled)',nmZh:'个人药品（放防水袋内，贴好姓名标签）',br:'N/A',pr:0,rec:1,school:1,searchUrl:'https://www.amazon.ca/s?k=medication+organizer+waterproof&tag=gearkit07-20'},
+  {cat:'📸 Optional',emoji:'📷',nm:'Camera (phones NOT allowed at school camp)',nmZh:'相机（学校营地不允许使用手机）',br:'Any',pr:25,rec:0,searchUrl:'https://www.amazon.ca/s?k=kids+camera+outdoor&tag=gearkit07-20'},
+  {cat:'📸 Optional',emoji:'📖',nm:'Journal & Pencil',nmZh:'日记本和铅笔',br:'Any',pr:5,rec:0,budgetAlt:'Dollarama $1',searchUrl:'https://www.amazon.ca/s?k=journal+notebook&tag=gearkit07-20'},
+],
+mid:[
+  {cat:'🏕️ Camp Comfort',emoji:'😴',nm:'Down Sleeping Bag -5°C, compression sack',nmZh:'鹅绒睡袋 -5°C，含压缩袋',br:'Rab / MEC',pr:290,rec:1,cold:1,searchUrl:'https://www.rei.com/search?q=down+sleeping+bag+kids'},
+  {cat:'🏕️ Camp Comfort',emoji:'🛏️',nm:'Insulated Self-Inflating Pad R3.5',nmZh:'保暖自充气垫 R3.5',br:'Therm-a-Rest ProLite',pr:115,rec:1,searchUrl:'https://www.rei.com/search?q=sleeping+pad+kids'},
+  {cat:'🧥 Clothing',emoji:'🧥',nm:'Waterproof Shell (taped seams, breathable)',nmZh:'防水外壳（封缝，透气）',br:"Marmot / Arc'teryx",pr:180,rec:1,cold:1,searchUrl:'https://www.rei.com/search?q=kids+rain+jacket+waterproof'},
+  {cat:'🧥 Clothing',emoji:'🧶',nm:'Merino Wool Base Layer Set',nmZh:'美利奴羊毛底层套装',br:'Smartwool / Icebreaker',pr:120,rec:1,cold:1,searchUrl:'https://www.rei.com/search?q=merino+base+layer+kids'},
+  {cat:'👟 Footwear',emoji:'👟',nm:'Waterproof Hiking Boots (kids/youth, GTX)',nmZh:'防水登山靴（儿童/青少年款，GTX）',br:'Salomon / Keen',pr:130,rec:1,searchUrl:'https://www.rei.com/search?q=kids+waterproof+hiking+boots'},
+  {cat:'🎒 Pack',emoji:'🎒',nm:'40L Youth Backpack with hip belt',nmZh:'40升青少年背包（含腰带）',br:'Osprey Jet / Deuter',pr:145,rec:1,searchUrl:'https://www.rei.com/search?q=kids+backpack+40l'},
+],
+premium:[
+  {cat:'🏕️ Camp Sleep',emoji:'😴',nm:'Ultralight Down Bag -10°C (youth size)',nmZh:'超轻鹅绒睡袋 -10°C（青少年尺寸）',br:'Sea to Summit / Marmot',pr:420,rec:1,cold:1,searchUrl:'https://www.rei.com/search?q=youth+sleeping+bag+-10'},
+  {cat:'🧥 Clothing',emoji:'🧥',nm:'Gore-Tex Hardshell Jacket (kids)',nmZh:'Gore-Tex 硬壳夹克（儿童款）',br:"Arc'teryx / Patagonia",pr:380,rec:1,cold:1,searchUrl:'https://www.rei.com/search?q=gore+tex+kids+jacket'},
+]
+},
+hiking:{
+basic:[
+  {cat:'👟 Footwear',emoji:'👟',nm:'Lightweight Hiking Shoes or Mid-weight Boot',nmZh:'轻量登山鞋或中等重量登山靴',br:'Decathlon Forclaz / Merrell',pr:65,rec:1,searchUrl:'https://www.rei.com/search?q=hiking+shoes'},
+  {cat:'👟 Footwear',emoji:'🧦',nm:'Wool Hiking Socks × 3 pairs',nmZh:'羊毛徒步袜 × 3双',br:'Darn Tough / Smartwool',pr:42,rec:1,searchUrl:'https://www.amazon.ca/s?k=wool+hiking+socks&tag=gearkit07-20'},
+  {cat:'🎒 Pack',emoji:'🎒',nm:'30L Daypack',nmZh:'30升日用背包',br:'Osprey Stratos / Decathlon',pr:65,rec:1,searchUrl:'https://www.rei.com/search?q=30l+daypack'},
+  {cat:'🧥 Clothing',emoji:'🧥',nm:'Softshell Wind Jacket',nmZh:'防风软壳外套',br:'The North Face / MEC',pr:75,rec:1,cold:1,searchUrl:'https://www.amazon.ca/s?k=softshell+wind+jacket&tag=gearkit07-20'},
+  {cat:'🧥 Clothing',emoji:'👖',nm:'Quick-Dry Hiking Pants/Shorts',nmZh:'速干登山裤/短裤',br:'Decathlon / Columbia',pr:38,rec:1,searchUrl:'https://www.amazon.ca/s?k=hiking+pants+quick+dry&tag=gearkit07-20'},
+  {cat:'🛡️ Safety',emoji:'🪄',nm:'Trekking Poles (pair, aluminum)',nmZh:'登山杖（一对，铝合金）',br:'Decathlon / Black Diamond',pr:45,rec:1,searchUrl:'https://www.amazon.ca/s?k=trekking+poles&tag=gearkit07-20'},
+  {cat:'🔧 Tools',emoji:'🔦',nm:'Headlamp 150+ lm with extra batteries',nmZh:'头灯 150+ 流明（附备用电池）',br:'Petzl Tikka',pr:25,rec:1,searchUrl:'https://www.amazon.ca/s?k=petzl+headlamp&tag=gearkit07-20'},
+  {cat:'🔧 Tools',emoji:'🗺️',nm:'Trail Map / Compass',nmZh:'地形图 + 指南针',br:'Any',pr:15,rec:1,searchUrl:'https://www.amazon.ca/s?k=hiking+compass&tag=gearkit07-20'},
+  {cat:'💧 Hydration',emoji:'💧',nm:'2L Water Bottle or Hydration Bladder',nmZh:'2升水壶或水袋',br:'Nalgene / Platypus',pr:18,rec:1,searchUrl:'https://www.amazon.ca/s?k=hydration+bladder+2l&tag=gearkit07-20'},
+  {cat:'🧴 Sun & Bug',emoji:'☀️',nm:'Sunscreen SPF 50+',nmZh:'防晒霜 SPF 50+',pr:8,rec:1,searchUrl:'https://www.amazon.ca/s?k=sunscreen+spf+50&tag=gearkit07-20'},
+],
+mid:[
+  {cat:'👟 Footwear',emoji:'👟',nm:'Waterproof Mid-height Hiking Boot (GTX)',nmZh:'防水中帮登山靴（GTX）',br:'Salomon X Ultra 4 GTX',pr:215,rec:1,searchUrl:'https://www.rei.com/search?q=waterproof+mid+hiking+boot'},
+  {cat:'🎒 Pack',emoji:'🎒',nm:'45L Lightweight Frame Backpack',nmZh:'45升轻量铝框背包',br:'Osprey Exos / Gregory Zulu',pr:260,rec:1,searchUrl:'https://www.rei.com/search?q=45l+hiking+pack'},
+  {cat:'🧥 Clothing',emoji:'🧶',nm:'Merino Wool Base Layer + Fleece Mid',nmZh:'美利奴底层+抓绒中层',br:'Icebreaker / Patagonia',pr:155,rec:1,cold:1,searchUrl:'https://www.rei.com/search?q=merino+base+layer'},
+  {cat:'🛡️ Safety',emoji:'🪄',nm:'Carbon Fiber Trekking Poles (pair)',nmZh:'碳纤维登山杖（一对）',br:'Black Diamond Trail Ergo',pr:145,rec:1,searchUrl:'https://www.rei.com/search?q=carbon+trekking+poles'},
+  {cat:'🔧 Tools',emoji:'💧',nm:'Water Filter / Purification Tablets',nmZh:'净水滤芯/净水片',br:'Sawyer Squeeze / Katadyn',pr:42,rec:1,searchUrl:'https://www.rei.com/search?q=water+filter+hiking'},
+  {cat:'🔧 Tools',emoji:'📍',nm:'GPS Watch',nmZh:'GPS 运动手表',br:'Garmin Instinct / Coros',pr:250,rec:0,searchUrl:'https://www.rei.com/search?q=gps+watch+hiking'},
+],
+premium:[
+  {cat:'👟 Footwear',emoji:'👟',nm:'Mountaineering Boot (waterproof, stiff)',nmZh:'专业登山靴（防水，硬底）',br:'La Sportiva TX5 GTX / Scarpa',pr:345,rec:1,searchUrl:'https://www.rei.com/search?q=mountaineering+boot'},
+  {cat:'🎒 Pack',emoji:'🎒',nm:'Ultralight 35L Carbon-frame Pack',nmZh:'超轻35升碳纤维框架包',br:'Hyperlite Mountain Gear / Zpacks',pr:680,rec:1,searchUrl:'https://www.rei.com/search?q=ultralight+backpack'},
+  {cat:'🧥 Clothing',emoji:'🧥',nm:'Gore-Tex Pro Hardshell Jacket',nmZh:'Gore-Tex Pro 专业硬壳夹克',br:"Arc'teryx Alpha SV / Mammut",pr:920,rec:1,cold:1,searchUrl:'https://www.rei.com/search?q=gore+tex+pro+hardshell'},
+]
+},
+skiing:{
+basic:[
+  {cat:'🧢 Protection',emoji:'⛑️',nm:'Ski Helmet (certified, fits over goggles)',nmZh:'滑雪头盔（认证款，可佩戴护目镜）',br:'Decathlon / Giro',pr:72,rec:1,cold:1,searchUrl:'https://www.amazon.ca/s?k=ski+helmet&tag=gearkit07-20'},
+  {cat:'🧢 Protection',emoji:'🥽',nm:'Ski Goggles (OTG if you wear glasses)',nmZh:'滑雪护目镜（戴眼镜选OTG款）',br:'Decathlon / Smith',pr:45,rec:1,cold:1,searchUrl:'https://www.amazon.ca/s?k=ski+goggles+OTG&tag=gearkit07-20'},
+  {cat:'🧢 Protection',emoji:'🛡️',nm:'Wrist Guards + Knee/Hip Pads',nmZh:'护腕 + 护膝/护臀',br:'Decathlon',pr:38,rec:1,searchUrl:'https://www.amazon.ca/s?k=ski+protective+gear&tag=gearkit07-20'},
+  {cat:'🧥 Clothing',emoji:'🧥',nm:'Waterproof Ski Jacket (insulated)',nmZh:'防水滑雪服上衣（保暖款）',br:'Decathlon / Columbia',pr:120,rec:1,cold:1,budgetAlt:'Shein ~$35',searchUrl:'https://www.amazon.ca/s?k=ski+jacket+waterproof&tag=gearkit07-20'},
+  {cat:'🧥 Clothing',emoji:'👖',nm:'Waterproof Ski Bib Pants',nmZh:'防水滑雪背带裤',br:'Decathlon / Columbia',pr:95,rec:1,cold:1,budgetAlt:'Shein ~$28',searchUrl:'https://www.amazon.ca/s?k=ski+pants+bib+waterproof&tag=gearkit07-20'},
+  {cat:'🧥 Clothing',emoji:'👕',nm:'Thermal Base Layer Set (top + bottom)',nmZh:'保暖底层套装（上衣+下装）',br:'Decathlon / Under Armour',pr:42,rec:1,cold:1,budgetAlt:'Temu ~$12',searchUrl:'https://www.amazon.ca/s?k=thermal+base+layer+ski&tag=gearkit07-20'},
+  {cat:'🧤 Accessories',emoji:'🧤',nm:'Waterproof Ski Gloves / Mittens',nmZh:'防水滑雪手套/连指手套',br:'Reusch / Decathlon',pr:48,rec:1,cold:1,budgetAlt:'Temu ~$12',searchUrl:'https://www.amazon.ca/s?k=ski+gloves+waterproof&tag=gearkit07-20'},
+  {cat:'🧤 Accessories',emoji:'🧦',nm:'Ski Socks × 2 (merino/synthetic)',nmZh:'滑雪袜 × 2双（美利奴/合成）',br:'Smartwool / Bridgedale',pr:38,rec:1,cold:1,searchUrl:'https://www.amazon.ca/s?k=ski+socks+merino&tag=gearkit07-20'},
+  {cat:'🧤 Accessories',emoji:'🧣',nm:'Neck Gaiter / Balaclava',nmZh:'颈套/头套',br:'Buff / Any',pr:22,rec:1,cold:1,budgetAlt:'Temu ~$5',searchUrl:'https://www.amazon.ca/s?k=neck+gaiter+ski&tag=gearkit07-20'},
+],
+mid:[
+  {cat:'🧢 Protection',emoji:'⛑️',nm:'MIPS Technology Helmet',nmZh:'MIPS 技术头盔（防震）',br:'Smith Vantage / Giro Range',pr:275,rec:1,cold:1,searchUrl:'https://www.rei.com/search?q=MIPS+ski+helmet'},
+  {cat:'🧢 Protection',emoji:'🥽',nm:'Photochromic / Interchangeable Lens Goggles',nmZh:'变色镜片护目镜',br:'Oakley Flight Deck / Smith I/O',pr:320,rec:1,searchUrl:'https://www.rei.com/search?q=ski+goggles+photochromic'},
+  {cat:'🧥 Clothing',emoji:'🧥',nm:'Gore-Tex Ski Jacket (hardshell)',nmZh:'Gore-Tex 滑雪硬壳夹克',br:'Spyder / Marmot',pr:540,rec:1,cold:1,searchUrl:'https://www.rei.com/search?q=gore+tex+ski+jacket'},
+  {cat:'🧥 Clothing',emoji:'👖',nm:'Gore-Tex Ski Pants (bib)',nmZh:'Gore-Tex 滑雪背带裤',br:'Spyder / Helly Hansen',pr:410,rec:1,cold:1,searchUrl:'https://www.rei.com/search?q=gore+tex+ski+pants'},
+  {cat:'🧥 Clothing',emoji:'🧶',nm:'Merino Wool Base Layer Set',nmZh:'美利奴羊毛底层套装',br:'Smartwool NTS',pr:140,rec:1,cold:1,searchUrl:'https://www.rei.com/search?q=merino+base+layer+ski'},
+],
+premium:[
+  {cat:'🧢 Protection',emoji:'⛑️',nm:'Top-tier MIPS Helmet (lightest, vented)',nmZh:'顶级MIPS头盔（最轻量，通风）',br:'Giro Avance / Poc Obex',pr:445,rec:1,cold:1,searchUrl:'https://www.rei.com/search?q=premium+ski+helmet'},
+  {cat:'🧥 Clothing',emoji:'🧥',nm:"Avalanche-Ready Ski Jacket (Recco + Gore-Tex)",nmZh:"雪崩防护滑雪服（Recco + Gore-Tex）",br:"Arc'teryx Sabre / Black Diamond",pr:1180,rec:1,cold:1,searchUrl:'https://www.rei.com/search?q=avalanche+ski+jacket'},
+  {cat:'🛡️ Safety',emoji:'📡',nm:'Avalanche Beacon + Shovel + Probe Kit',nmZh:'雪崩信标+探针+铲子套装',pr:640,rec:0,searchUrl:'https://www.rei.com/search?q=avalanche+safety+kit'},
+]
+},
+cycling:{
+basic:[
+  {cat:'🧢 Safety',emoji:'⛑️',nm:'Bike Helmet (CPSC/CE certified)',nmZh:'自行车头盔（认证款）',br:'Bell Qualifier / Giro Register',pr:55,rec:1,searchUrl:'https://www.amazon.ca/s?k=bike+helmet+certified&tag=gearkit07-20'},
+  {cat:'🧢 Safety',emoji:'🧤',nm:'Cycling Gloves (half-finger)',nmZh:'骑行手套（半指）',br:'Decathlon / Pearl Izumi',pr:16,rec:1,searchUrl:'https://www.amazon.ca/s?k=cycling+gloves+half+finger&tag=gearkit07-20'},
+  {cat:'🧥 Clothing',emoji:'🩳',nm:'Padded Cycling Shorts / Bib',nmZh:'带护垫骑行短裤',br:'Decathlon',pr:38,rec:1,budgetAlt:'Shein ~$12',searchUrl:'https://www.amazon.ca/s?k=padded+cycling+shorts&tag=gearkit07-20'},
+  {cat:'🧥 Clothing',emoji:'👕',nm:'Moisture-Wicking Cycling Jersey',nmZh:'速干骑行上衣',br:'Decathlon',pr:22,rec:1,budgetAlt:'Shein ~$10',searchUrl:'https://www.amazon.ca/s?k=cycling+jersey&tag=gearkit07-20'},
+  {cat:'🔧 Accessories',emoji:'📊',nm:'Bike Computer / GPS (basic)',nmZh:'骑行码表/GPS（基础款）',br:'Cateye / Wahoo Elemnt Bolt',pr:28,rec:1,searchUrl:'https://www.amazon.ca/s?k=bike+computer+gps&tag=gearkit07-20'},
+  {cat:'🔧 Accessories',emoji:'💡',nm:'Front + Rear Light Set (USB rechargeable)',nmZh:'前灯+尾灯套装（USB充电）',br:'Cateye / Lezyne',pr:38,rec:1,searchUrl:'https://www.amazon.ca/s?k=bike+light+set+rechargeable&tag=gearkit07-20'},
+  {cat:'🔧 Accessories',emoji:'🔧',nm:'Flat Repair Kit (tubes, levers, mini pump)',nmZh:'补胎工具套装（内胎、撬胎棒、微型打气筒）',br:'Park Tool / Topeak',pr:28,rec:1,searchUrl:'https://www.amazon.ca/s?k=bike+repair+kit+flat&tag=gearkit07-20'},
+  {cat:'💧 Hydration',emoji:'💧',nm:'Water Bottles × 2 + Cages',nmZh:'水壶 × 2 + 水壶架',br:'Specialized / Elite',pr:18,rec:1,searchUrl:'https://www.amazon.ca/s?k=bike+water+bottle+cage&tag=gearkit07-20'},
+],
+mid:[
+  {cat:'🧢 Safety',emoji:'⛑️',nm:'MIPS Aero Cycling Helmet',nmZh:'MIPS 气动骑行头盔',br:'Giro Aether MIPS / Bontrager',pr:270,rec:1,searchUrl:'https://www.rei.com/search?q=mips+road+helmet'},
+  {cat:'🧥 Clothing',emoji:'🩳',nm:'Bib Shorts — Italian chamois pad',nmZh:'背带骑行裤 — 意大利坐垫',br:'Castelli / Rapha',pr:175,rec:1,searchUrl:'https://www.rei.com/search?q=bib+shorts'},
+  {cat:'🔧 Accessories',emoji:'📊',nm:'GPS Bike Computer with Maps',nmZh:'带地图GPS骑行码表',br:'Garmin Edge 530 / Wahoo',pr:295,rec:1,searchUrl:'https://www.rei.com/search?q=garmin+edge+bike+computer'},
+  {cat:'🔧 Accessories',emoji:'👟',nm:'Cycling Shoes (SPD-SL clipless)',nmZh:'公路骑行锁鞋（SPD-SL卡扣）',br:'Shimano RC5 / Bontrager',pr:155,rec:1,searchUrl:'https://www.rei.com/search?q=road+cycling+shoes'},
+],
+premium:[
+  {cat:'🧢 Safety',emoji:'⛑️',nm:'Top Aero Race Helmet',nmZh:'顶级气动竞赛头盔',br:'Specialized S-Works / Giro Aerohead',pr:640,rec:1,searchUrl:'https://www.rei.com/search?q=aero+race+helmet'},
+  {cat:'🔧 Accessories',emoji:'📊',nm:'Power Meter + GPS Computer Bundle',nmZh:'功率计 + GPS码表套装',br:'Garmin Edge 1040 + Favero Assioma',pr:1100,rec:0,searchUrl:'https://www.rei.com/search?q=power+meter+cycling'},
+]
+}
+};
+const FB_GEAR=[{cat:'⭐ Custom',emoji:'🎒',nm:'Custom Gear — Contact Us',nmZh:'定制装备 — 联系我们',br:'GearKit Expert',pr:0,rec:1,searchUrl:'https://gearkit.com/contact'}];
+
+/* EXTRA / SPECIALTY ITEMS */
+const EXTRA_ITEMS=[
+  {cat:'🚣 Water Activities',emoji:'🦺',nm:'Neoprene Wetsuit (3mm)',nmZh:'氯丁橡胶潜水服（3mm）',br:'O\'Neill / Decathlon',pr:120,link:'https://www.rei.com/search?q=neoprene+wetsuit'},
+  {cat:'🚣 Water Activities',emoji:'🥾',nm:'Neoprene Booties (thick-soled)',nmZh:'氯丁橡胶潜水靴（厚底）',br:'Decathlon / Xterra',pr:45,link:'https://www.amazon.ca/s?k=neoprene+booties+thick&tag=gearkit07-20'},
+  {cat:'🚣 Water Activities',emoji:'🧤',nm:'Neoprene Gloves / Pogies (kayak)',nmZh:'氯丁橡胶手套/划桨手套',br:'NRS / Glacier Glove',pr:35,link:'https://www.rei.com/search?q=neoprene+paddling+gloves'},
+  {cat:'🚣 Water Activities',emoji:'👓',nm:'Swimming Goggles + Nose Plug',nmZh:'泳镜 + 鼻夹',br:'Any',pr:12,link:'https://www.amazon.ca/s?k=swimming+goggles+nose+plug&tag=gearkit07-20',budgetAlt:'Temu ~$3'},
+  {cat:'🚣 Water Activities',emoji:'🛶',nm:'Dry Bags 10L × 3 (for sea kayaking)',nmZh:'干袋 10升 × 3（海上皮划艇用）',br:'Sea to Summit / NRS',pr:55,link:'https://www.rei.com/search?q=dry+bag+10l'},
+  {cat:'🧗 Climbing',emoji:'🧗',nm:'Rock Climbing Shoes',nmZh:'攀岩鞋',br:'La Sportiva / Scarpa',pr:95,link:'https://www.rei.com/search?q=rock+climbing+shoes'},
+  {cat:'🧗 Climbing',emoji:'🪖',nm:'Climbing Harness (beginners)',nmZh:'攀岩安全带（初学者款）',br:'Black Diamond / Petzl',pr:55,link:'https://www.rei.com/search?q=beginner+climbing+harness'},
+  {cat:'🧗 Climbing',emoji:'🔒',nm:'Belay Device + Locking Carabiner',nmZh:'确保器 + 锁扣',br:'Black Diamond ATC / Petzl Grigri',pr:42,link:'https://www.rei.com/search?q=belay+device'},
+  {cat:'🌊 Surfing',emoji:'🏄',nm:'Surf Leash (fits board size)',nmZh:'冲浪绳（根据板子尺寸选择）',br:'FCS / Creatures of Leisure',pr:25,link:'https://www.amazon.ca/s?k=surf+leash&tag=gearkit07-20'},
+  {cat:'🌊 Surfing',emoji:'🧴',nm:'Surf Wax (appropriate for water temp)',nmZh:'冲浪蜡（根据水温选择）',br:'Sticky Bumps / Sex Wax',pr:8,link:'https://www.amazon.ca/s?k=surf+wax&tag=gearkit07-20'},
+  {cat:'🏔️ Technical Mountaineering',emoji:'⛏️',nm:'Ice Axe (technical terrain)',nmZh:'冰斧（技术地形用）',br:'Black Diamond / Grivel',pr:95,link:'https://www.rei.com/search?q=ice+axe'},
+  {cat:'🏔️ Technical Mountaineering',emoji:'🪛',nm:'Crampons (12-point, for ice/snow)',nmZh:'冰爪（12齿，冰雪地形）',br:'Grivel / Black Diamond',pr:110,link:'https://www.rei.com/search?q=crampons'},
+  {cat:'🏔️ Technical Mountaineering',emoji:'🦺',nm:'Gaiters (knee-high, for snow/mud)',nmZh:'绑腿（及膝款，雪地/泥地）',br:'Outdoor Research / Salomon',pr:45,link:'https://www.rei.com/search?q=gaiters+knee+high'},
+  {cat:'🚵 Mountain Biking',emoji:'🩱',nm:'Full-face MTB Helmet',nmZh:'全脸山地车头盔',br:'Fox Racing / Troy Lee Designs',pr:145,link:'https://www.rei.com/search?q=full+face+mtb+helmet'},
+  {cat:'🚵 Mountain Biking',emoji:'🛡️',nm:'Body Armor / Elbow + Knee Pads',nmZh:'护甲/护肘+护膝套装',br:'Leatt / Fox Racing',pr:85,link:'https://www.rei.com/search?q=mountain+bike+body+armor'},
+  {cat:'⛺ Camping Niche',emoji:'🪚',nm:'Folding Saw / Hand Axe',nmZh:'折叠锯/小斧头',br:'Silky / Fiskars',pr:28,link:'https://www.amazon.ca/s?k=folding+saw+camping&tag=gearkit07-20'},
+  {cat:'⛺ Camping Niche',emoji:'🍵',nm:'Jetboil Flash (fastest boil)',nmZh:'Jetboil Flash 极速煮水器',br:'Jetboil',pr:115,link:'https://www.rei.com/search?q=jetboil+flash'},
+  {cat:'⛺ Camping Niche',emoji:'🪳',nm:'Bear Canister (required in some parks)',nmZh:'防熊食物罐（部分公园强制要求）',br:'BV500 / Garcia',pr:65,link:'https://www.rei.com/search?q=bear+canister'},
+  {cat:'⛺ Camping Niche',emoji:'🚿',nm:'Solar Camp Shower (5-gal)',nmZh:'太阳能营地淋浴袋（5加仑）',br:'Advanced Elements',pr:22,link:'https://www.amazon.ca/s?k=solar+camp+shower&tag=gearkit07-20',budgetAlt:'Temu ~$8'},
+  {cat:'⛺ Camping Niche',emoji:'🧲',nm:'Ground Tarp / Footprint for tent',nmZh:'地布/帐篷脚垫',br:'Any',pr:15,link:'https://www.amazon.ca/s?k=tent+footprint+ground+tarp&tag=gearkit07-20',budgetAlt:'Temu ~$8'},
+  {cat:'🏕️ School Camp Specific',emoji:'📦',nm:'Laundry Bag (wet/dirty clothes)',nmZh:'洗衣袋（存放湿/脏衣物）',br:'Any',pr:4,link:'https://www.amazon.ca/s?k=laundry+bag+mesh&tag=gearkit07-20',budgetAlt:'Dollarama $1'},
+  {cat:'🏕️ School Camp Specific',emoji:'🏷️',nm:'Clothing Labels (iron-on, name labels)',nmZh:'衣物标签（热烫款，标注姓名）',br:'Mabel\'s Labels / Amazon',pr:12,link:'https://www.amazon.ca/s?k=iron+on+clothing+labels+name&tag=gearkit07-20'},
+  {cat:'🏕️ School Camp Specific',emoji:'💊',nm:'Waterproof Medication Organizer',nmZh:'防水药品收纳盒',br:'Any',pr:8,link:'https://www.amazon.ca/s?k=waterproof+medication+organizer&tag=gearkit07-20',budgetAlt:'Temu ~$3'},
+  {cat:'🔬 Navigation',emoji:'🗺️',nm:'Compass + Topographic Map',nmZh:'指南针 + 地形图',br:'Silva / Suunto',pr:18,link:'https://www.amazon.ca/s?k=orienteering+compass&tag=gearkit07-20'},
+  {cat:'🔬 Navigation',emoji:'📡',nm:'Two-way Radios (pair)',nmZh:'对讲机（一对）',br:'Motorola / Midland',pr:42,link:'https://www.amazon.ca/s?k=two+way+radio+outdoor&tag=gearkit07-20',budgetAlt:'Temu ~$15'},
+];
+
+/* ══════════════════════ STATE ══════════════════════ */
+const S={act:null,tier:null,grp:'solo',cnt:3,lang:'en'};
+let extraSelected=new Set();
+
+/* ══════════════════════ LANG ══════════════════════ */
+function toggleLang(){document.getElementById('langDrop').classList.toggle('open')}
+document.addEventListener('click',e=>{if(!e.target.closest('.lang-picker'))document.getElementById('langDrop').classList.remove('open')});
+function setLang(l){
+  S.lang=l;
+  const flags={en:'🇺🇸',zh:'🇨🇳',es:'🇪🇸',ar:'🇸🇦'},lbls={en:'EN',zh:'中文',es:'ES',ar:'عربي'};
+  document.getElementById('flagEl').textContent=flags[l];
+  document.getElementById('lblEl').textContent=lbls[l];
+  document.querySelectorAll('.lang-option').forEach(o=>o.classList.toggle('active',o.onclick.toString().includes("'"+l+"'")));
+  const html=document.documentElement;html.lang=l;html.dir=l==='ar'?'rtl':'ltr';
+  document.getElementById('langDrop').classList.remove('open');
+  buildActGrid();applyT();
+}
+function applyT(){
+  const t=T[S.lang];
+  document.querySelectorAll('[data-t]').forEach(el=>{const k=el.getAttribute('data-t');if(t[k]!==undefined)el.innerHTML=t[k]});
+  const maps={exp:['ePlc','eF','eS','eE'],days:['dPlc','d1','d2','d7','d14'],climate:['','cMtn','cDes','cCst','cFor','cArc','cTrp']};
+  Object.entries(maps).forEach(([id,keys])=>{const sel=document.getElementById(id);if(!sel)return;sel.querySelectorAll('option').forEach((o,i)=>{if(keys[i]&&t[keys[i]])o.textContent=t[keys[i]]})});
+  const ms=document.getElementById('month');const mv=ms.value;
+  ms.querySelectorAll('option').forEach((o,i)=>{if(i>0&&t.months)o.textContent=t.months[i-1]});ms.value=mv;
+  updHint();
+  if(document.getElementById('gearList').innerHTML)buildGear();
+}
+
+/* ══════════════════════ ACTIVITY GRID ══════════════════════ */
+function buildActGrid(){
+  const t=T[S.lang];const con=document.getElementById('actGrid');con.innerHTML='';
+  ACTS.forEach(a=>{
+    const name=t['a'+a.id.charAt(0).toUpperCase()+a.id.slice(1)]||a.id;
+    const div=document.createElement('div');div.className='act-card'+(S.act===a.id?' selected':'');
+    div.onclick=()=>pickAct(div,a.id);
+    const isZh=S.lang==='zh';
+    // Use placeholder emoji image for reliability
+    div.innerHTML=`
+      <div class="act-img-placeholder">${a.icon}</div>
+      <div class="act-name">${isZh?(t['a'+a.id.charAt(0).toUpperCase()+a.id.slice(1)]||name):name}</div>
+      ${a.popular?`<span class="act-badge" data-t="aPop">${t.aPop||'Most Popular'}</span>`:''}
+    `;
+    // Try to load real image
+    const img=new Image();img.src=a.img;
+    img.onload=()=>{const ph=div.querySelector('.act-img-placeholder');if(ph){const imgEl=document.createElement('img');imgEl.src=a.img;imgEl.className='act-img';imgEl.alt=name;ph.replaceWith(imgEl);}};
+    con.appendChild(div);
+  });
+}
+
+/* ══════════════════════ STEP 1 ══════════════════════ */
+function pickAct(el,act){
+  document.querySelectorAll('.act-card').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');S.act=act;document.getElementById('btn1').disabled=false;
+}
+
+/* ══════════════════════ STEP 2 ══════════════════════ */
+function pickTier(el,t){document.querySelectorAll('.tier-card:not(.t-group)').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');S.tier=t;chk2()}
+function pickGroup(el,g){document.querySelectorAll('.t-group').forEach(c=>c.classList.remove('selected'));el.classList.add('selected');S.grp=g;document.getElementById('grpRow').classList.toggle('visible',g!=='solo');chk2()}
+function chgCnt(d){S.cnt=Math.max(2,Math.min(20,S.cnt+d));document.getElementById('grpCnt').textContent=S.cnt}
+function pickGType(el){document.querySelectorAll('.gtype-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active')}
+function chk2(){
+  const ok=S.tier&&S.grp&&document.getElementById('age').value&&document.getElementById('height').value&&
+    document.getElementById('weight').value&&document.getElementById('exp').value&&
+    document.getElementById('days').value&&document.getElementById('month').value&&document.getElementById('dest').value.trim();
+  document.getElementById('btn2').disabled=!ok;
+}
+
+/* ══════════════════════ CLIMATE HINT ══════════════════════ */
+function updHint(){
+  const h=document.getElementById('hint');const cl=document.getElementById('climate').value;const mo=parseInt(document.getElementById('month').value)||0;
+  if(!cl||!mo){h.classList.remove('show');return}
+  const cold=[11,12,1,2,3].includes(mo);const cd=T[S.lang].climate;
+  if(cd&&cd[cl]){h.textContent=cold?cd[cl].c:cd[cl].w;h.classList.add('show')}
+}
+
+/* ══════════════════════ STEP 3 — GEAR BUILD ══════════════════════ */
+function buildGear(){
+  const t=T[S.lang];
+  const data=GEAR[S.act];
+  let items=data?[...(data[S.tier]||FB_GEAR)]:[...FB_GEAR];
+  const mo=parseInt(document.getElementById('month').value)||6;
+  const cl=document.getElementById('climate').value;
+  const cold=[11,12,1,2,3].includes(mo)||cl==='arctic'||cl==='mountain';
+  if(cold)items=items.map(i=>i.cold?{...i,rec:1}:i);
+
+  const dest=document.getElementById('dest').value.trim();
+  const moLbl=mo&&t.months?t.months[mo-1]:'';
+  const an=t.actN?t.actN[S.act]||S.act:S.act;
+  const tn=t.tierN?t.tierN[S.tier]||S.tier:S.tier;
+  const gn=t.grpN?t.grpN[S.grp]||S.grp:S.grp;
+  document.getElementById('s3sub').textContent=`${an} · ${tn} · ${gn}${dest?' · '+dest:''}${moLbl?' · '+moLbl:''}`;
+
+  const con=document.getElementById('gearList');con.innerHTML='';let lc='';
+  items.forEach(it=>{
+    if(it.cat!==lc){const d=document.createElement('div');d.className='gear-cat-header';d.textContent=it.cat;con.appendChild(d);lc=it.cat}
+    const div=document.createElement('div');div.className='gear-item'+(it.rec?' checked':'');
+    div.dataset.pr=it.pr;div.dataset.nm=it.nm;div.dataset.br=it.br||'';
+    div.onclick=()=>div.classList.toggle('checked');
+    const showZh=S.lang==='zh'&&it.nmZh;
+    const tags=(it.rec?`<span class="rec-tag">${t.recLbl||'Rec'}</span>`:'')+
+               (it.cold&&cold?`<span class="cold-tag">${t.coldLbl||'Cold'}</span>`:'')+
+               (it.school?`<span class="school-tag">${t.schoolLbl||'School'}</span>`:'');
+    const budgetHtml=it.budgetAlt?`<div class="gear-price-budget">💰 ${it.budgetAlt}</div>`:'';
+    const searchLink=it.searchUrl?`<a class="extra-link" href="${it.searchUrl}" target="_blank" onclick="event.stopPropagation()">Search →</a>`:'';
+    div.innerHTML=`
+      <div class="gear-thumb-ph">${it.emoji||'📦'}</div>
+      <div class="gear-check">✓</div>
+      <div class="gear-info">
+        <div class="gear-name">${it.nm} ${tags}</div>
+        ${showZh?`<div class="gear-name-zh">${it.nmZh}</div>`:''}
+        <div class="gear-brand">${it.br||''}${searchLink}</div>
+      </div>
+      <div><div class="gear-price">${it.pr>0?'$'+it.pr:'Free'}</div>${budgetHtml}</div>`;
+    con.appendChild(div);
+  });
+}
+
+/* ══════════════════════ EXTRA ITEMS MODAL ══════════════════════ */
+function openModal(){
+  const t=T[S.lang];const con=document.getElementById('extraList');con.innerHTML='';let lc='';
+  EXTRA_ITEMS.forEach(it=>{
+    if(it.cat!==lc){const d=document.createElement('div');d.className='gear-cat-header';d.textContent=it.cat;con.appendChild(d);lc=it.cat}
+    const div=document.createElement('div');div.className='extra-gear-item'+(extraSelected.has(it.nm)?' checked':'');
+    div.onclick=()=>{div.classList.toggle('checked');if(div.classList.contains('checked'))extraSelected.add(it.nm);else extraSelected.delete(it.nm)};
+    const showZh=S.lang==='zh'&&it.nmZh;
+    div.innerHTML=`
+      <div class="gear-thumb-ph" style="width:36px;height:36px;font-size:18px">${it.emoji||'📦'}</div>
+      <div class="gear-check">✓</div>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:500">${it.nm}</div>
+        ${showZh&&it.nmZh?`<div style="font-size:11px;color:var(--gray-text)">${it.nmZh}</div>`:''}
+        <div style="font-size:11px;color:var(--gray-text)">${it.br||''}</div>
+        ${it.link?`<a class="extra-link" href="${it.link}" target="_blank" onclick="event.stopPropagation()">Search on REI / Amazon →</a>`:''}
+        ${it.budgetAlt?`<div style="font-size:10px;color:var(--green-dark);margin-top:2px">💰 Budget: ${it.budgetAlt}</div>`:''}
+      </div>
+      <div style="font-size:13px;font-weight:700;white-space:nowrap">${it.pr>0?'$'+it.pr:'—'}</div>`;
+    con.appendChild(div);
+  });
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('open');document.body.style.overflow=''}
+function closeModalOutside(e){if(e.target===document.getElementById('modalOverlay'))closeModal()}
+function addExtraItems(){
+  const t=T[S.lang];const con=document.getElementById('gearList');
+  EXTRA_ITEMS.filter(it=>extraSelected.has(it.nm)).forEach(it=>{
+    // Check if already added
+    if(con.querySelector(`[data-nm="${it.nm}"]`))return;
+    const div=document.createElement('div');div.className='gear-item checked';
+    div.dataset.pr=it.pr;div.dataset.nm=it.nm;div.dataset.br=it.br||'';
+    div.onclick=()=>div.classList.toggle('checked');
+    div.innerHTML=`
+      <div class="gear-thumb-ph">${it.emoji||'📦'}</div>
+      <div class="gear-check">✓</div>
+      <div class="gear-info">
+        <div class="gear-name">${it.nm} <span style="font-size:10px;background:var(--purple-light);color:var(--purple);padding:2px 7px;border-radius:10px;font-weight:600">Specialty</span></div>
+        <div class="gear-brand">${it.br||''}</div>
+      </div>
+      <div class="gear-price">${it.pr>0?'$'+it.pr:'—'}</div>`;
+    con.appendChild(div);
+  });
+  closeModal();
+}
+
+/* ══════════════════════ STEP 4 — SUMMARY ══════════════════════ */
+function buildSum(){
+  const t=T[S.lang];const ck=document.querySelectorAll('#gearList .gear-item.checked');
+  const tbl=document.getElementById('s4table');tbl.innerHTML='';let tot=0;
+  ck.forEach(it=>{
+    const pr=parseInt(it.dataset.pr)||0;tot+=pr;
+    const r=document.createElement('div');r.className='summary-row';
+    r.innerHTML=`<div><div class="s-name">${it.dataset.nm}</div><div class="s-brand">${it.dataset.br||''}</div></div><div style="font-weight:600;white-space:nowrap">$${pr}</div>`;
+    tbl.appendChild(r);
+  });
+  const tr=document.createElement('div');tr.className='summary-row';tr.style.cssText='font-weight:700;font-size:15px;background:var(--gray-bg)';
+  tr.innerHTML=`<span>${ck.length} items</span><span style="color:var(--green)">$${tot.toLocaleString()}</span>`;tbl.appendChild(tr);
+  document.getElementById('s4total').textContent='$'+tot.toLocaleString();
+  const mo=parseInt(document.getElementById('month').value)||0;const moLbl=mo&&t.months?t.months[mo-1]:'';
+  const dest=document.getElementById('dest').value.trim();
+  const an=t.actN?t.actN[S.act]||S.act:S.act;const tn=t.tierN?t.tierN[S.tier]||S.tier:S.tier;const gn=t.grpN?t.grpN[S.grp]||S.grp:S.grp;
+  document.getElementById('s4desc').textContent=`${an} · ${tn} · ${gn}${dest?' · '+dest:''}${moLbl?' · '+moLbl:''}`;
+}
+
+/* ══════════════════════ NAVIGATION ══════════════════════ */
+function goStep(n){
+  if(n===3)buildGear();if(n===4)buildSum();
+  document.querySelectorAll('.step-panel').forEach((p,i)=>p.classList.toggle('active',i===n-1));
+  for(let i=1;i<=4;i++){
+    const d=document.getElementById('pd'+i),l=document.getElementById('pl'+i);
+    d.className='prog-dot';l.className='prog-label';
+    if(i<n)d.classList.add('done');else if(i===n){d.classList.add('active');l.classList.add('active')}
+  }
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function restart(){
+  S.act=null;S.tier=null;S.grp='solo';S.cnt=3;extraSelected.clear();
+  document.querySelectorAll('.act-card,.tier-card').forEach(c=>c.classList.remove('selected'));
+  ['age','height','weight','exp','days','month','dest','climate'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});
+  document.getElementById('grpRow').classList.remove('visible');document.getElementById('grpCnt').textContent='3';
+  document.getElementById('btn1').disabled=true;document.getElementById('btn2').disabled=true;
+  document.getElementById('hint').classList.remove('show');document.getElementById('gearList').innerHTML='';
+  goStep(1);
+}
+
+// INIT
+buildActGrid();applyT();
+</script>
+</body>
+</html>
